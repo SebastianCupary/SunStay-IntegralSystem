@@ -122,7 +122,6 @@ sunstay/
 ├── docker-compose.yml
 ├── .env.example
 ├── package.json
-├── pnpm-workspace.yaml
 ├── README.md
 └── AGENTS.md
 ```

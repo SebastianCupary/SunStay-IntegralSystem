@@ -2,13 +2,18 @@
   "name": "sunstay",
   "private": true,
   "description": "SunStay - Hotel management system for Hotel Tropical Sun",
+  "packageManager": "bun@1.2.3",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev:web": "pnpm --filter @sunstay/web dev",
-    "dev:api": "pnpm --filter @sunstay/api start:dev",
-    "build:web": "pnpm --filter @sunstay/web build",
-    "build:api": "pnpm --filter @sunstay/api build",
-    "lint": "pnpm -r lint",
-    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+    "dev:web": "bun --filter @sunstay/web dev",
+    "dev:api": "bun --filter @sunstay/api start:dev",
+    "build:web": "bun --filter @sunstay/web build",
+    "build:api": "bun --filter @sunstay/api build",
+    "lint": "bun --filter '*' lint",
+    "format": "bunx prettier --write \"**/*.{ts,tsx,json,md}\""
   },
   "engines": {
     "node": ">=18"

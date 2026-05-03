@@ -6,7 +6,7 @@ SunStay is an internal hotel management system for Hotel Tropical Sun. It follow
 
 ## Created Structure
 
-The project is organized as a pnpm monorepo with the following main areas:
+The project is organized as a Bun workspace monorepo with the following main areas:
 
 ### apps/web — Next.js Frontend
 
@@ -62,13 +62,13 @@ The project is organized as a pnpm monorepo with the following main areas:
 | Database           | PostgreSQL                       |
 | ORM                | Prisma ORM                       |
 | API Style          | REST                             |
-| Package Manager    | pnpm                             |
+| Package Manager    | Bun                              |
 | Containers         | Docker + Docker Compose          |
 | Cloud Target       | Azure                            |
 
 ## Architecture Principles
 
-- Monorepo with clear package boundaries
+- Bun workspace monorepo with clear package boundaries
 - Modular backend (one NestJS module per business domain)
 - Feature-based frontend organization
 - Shared types and validators to ensure consistency between frontend and backend
