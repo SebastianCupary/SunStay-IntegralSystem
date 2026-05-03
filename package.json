@@ -1,0 +1,16 @@
+{
+  "name": "sunstay",
+  "private": true,
+  "description": "SunStay - Hotel management system for Hotel Tropical Sun",
+  "scripts": {
+    "dev:web": "pnpm --filter @sunstay/web dev",
+    "dev:api": "pnpm --filter @sunstay/api start:dev",
+    "build:web": "pnpm --filter @sunstay/web build",
+    "build:api": "pnpm --filter @sunstay/api build",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
