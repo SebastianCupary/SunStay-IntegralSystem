@@ -37,7 +37,7 @@ The selected database engine for SunStay is **PostgreSQL**.
 
 PostgreSQL is used as the main transactional database because the hotel domain requires structured and relational data between reservations, guests, rooms, invoices, inventory, staff, attendance, common areas, and reports.
 
-The selected ORM is **Prisma ORM**, used from the **NestJS** backend with **TypeScript**.
+The selected ORM is **Prisma ORM**, used from the **NestJS** backend with **TypeScript** and executed through **Bun** project scripts.
 
 ### Technology decisions
 
@@ -46,9 +46,25 @@ The selected ORM is **Prisma ORM**, used from the **NestJS** backend with **Type
 | Database engine | PostgreSQL |
 | ORM | Prisma ORM |
 | Backend integration | NestJS + TypeScript |
+| Runtime and package manager | Bun |
 | API style | REST |
-| Local development | Docker Compose |
+| Local development | Docker Compose with Bun-compatible services |
 | Cloud database target | Azure Database for PostgreSQL |
+
+---
+
+## 2.1 Bun and Prisma Execution Rules
+
+The project has migrated completely to **Bun**. Prisma and database-related commands must be exposed through Bun-compatible scripts. Documentation and setup instructions must avoid npm, yarn, or pnpm commands.
+
+Examples of expected command style:
+
+```txt
+bun install
+bun run prisma:generate
+bun run prisma:migrate
+bun run prisma:studio
+```
 
 ---
 
@@ -1722,3 +1738,172 @@ The following decisions must be validated during implementation:
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026 | Initial SunStay database documentation. |
+
+
+---
+
+## 10. User, Role, and Module Access Control Update
+
+The system requires a web-based user administration module because access to SunStay modules is controlled by role. The database must therefore support users, roles, system modules, role permissions, account status tracking, and security-related records.
+
+### 10.1 Access-control entities
+
+| Entity | Purpose |
+|---|---|
+| User | Stores internal system users who authenticate and access SunStay. |
+| Role | Defines the operational role assigned to users. |
+| SystemModule | Catalog of system modules that can be controlled by permissions. |
+| RoleModulePermission | Defines what each role can do in each module. |
+| UserStatusHistory | Tracks changes in user account status. |
+| UserSession | Stores active or historical login sessions when required. |
+| PasswordResetToken | Stores temporary password reset requests when required. |
+
+### 10.2 User
+
+Stores internal user accounts for system access.
+
+| Field | Type | Description |
+|---|---|---|
+| id | UUID / Int | Primary key. |
+| staffId | FK / Nullable | Related staff member, when the user belongs to hotel staff. |
+| roleId | FK | Assigned system role. |
+| fullName | String | User full name. |
+| email | String | Login email or contact email. Must be unique. |
+| phone | String / Nullable | Contact phone. |
+| passwordHash | String | Secure password hash. Never store plain-text passwords. |
+| status | String / Catalog | Active, Inactive, or Blocked. |
+| lastAccessAt | DateTime / Nullable | Last successful access. |
+| createdAt | DateTime | Creation date. |
+| updatedAt | DateTime | Last update date. |
+
+Relationships:
+
+- One role can be assigned to many users.
+- One user can be linked to one staff member.
+- One user can generate many reports.
+- One user can perform many audited actions.
+- One user can have many status history records.
+
+### 10.3 Role
+
+Defines access profiles for internal users.
+
+Recommended base values:
+
+- Administrator
+- Receptionist
+- Inventory Manager
+- Management
+
+| Field | Type | Description |
+|---|---|---|
+| id | UUID / Int | Primary key. |
+| name | String | Role name. Must be unique. |
+| description | String | Role description. |
+| isSystemRole | Boolean | Indicates whether it is a protected base role. |
+| createdAt | DateTime | Creation date. |
+| updatedAt | DateTime | Last update date. |
+
+Relationships:
+
+- One role can be assigned to many users.
+- One role can have many module permissions.
+
+### 10.4 SystemModule
+
+Catalog of modules that can be shown, hidden, or restricted according to role.
+
+Recommended values:
+
+- Dashboard
+- Reservations
+- Guests
+- Rooms
+- Billing
+- Inventory
+- Staff
+- Attendance
+- Common Areas
+- Reports
+- Users
+- Roles
+
+| Field | Type | Description |
+|---|---|---|
+| id | UUID / Int | Primary key. |
+| name | String | Module name. |
+| code | String | Stable internal code, for example `RESERVATIONS`. |
+| route | String | Main frontend route. |
+| description | String | Module purpose. |
+| isActive | Boolean | Indicates whether the module is enabled. |
+
+Relationships:
+
+- One system module can appear in many role permission records.
+
+### 10.5 RoleModulePermission
+
+Defines permissions granted to each role over each system module.
+
+| Field | Type | Description |
+|---|---|---|
+| id | UUID / Int | Primary key. |
+| roleId | FK | Related role. |
+| systemModuleId | FK | Related module. |
+| canView | Boolean | Allows viewing the module. |
+| canCreate | Boolean | Allows creating records. |
+| canUpdate | Boolean | Allows updating records. |
+| canDelete | Boolean | Allows deleting/cancelling records when applicable. |
+| canExport | Boolean | Allows exporting data or reports. |
+| canManage | Boolean | Allows administrative management actions. |
+| createdAt | DateTime | Creation date. |
+| updatedAt | DateTime | Last update date. |
+
+Relationships:
+
+- One role has many role-module permissions.
+- One system module has many role-module permissions.
+
+Recommended unique constraint:
+
+```txt
+roleId + systemModuleId
+```
+
+### 10.6 UserStatusHistory
+
+Tracks status changes for user accounts.
+
+| Field | Type | Description |
+|---|---|---|
+| id | UUID / Int | Primary key. |
+| userId | FK | User whose status changed. |
+| previousStatus | String | Previous account status. |
+| newStatus | String | New account status. |
+| changedByUserId | FK | Administrator who performed the change. |
+| changeDateTime | DateTime | Date and time of change. |
+| reason | String / Nullable | Reason or observation. |
+
+### 10.7 PasswordResetToken
+
+Stores temporary password reset records when password reset is implemented.
+
+| Field | Type | Description |
+|---|---|---|
+| id | UUID / Int | Primary key. |
+| userId | FK | Related user. |
+| tokenHash | String | Hashed reset token. |
+| expiresAt | DateTime | Expiration date and time. |
+| usedAt | DateTime / Nullable | Usage date and time. |
+| createdAt | DateTime | Creation date. |
+
+### 10.8 Access-control database rules
+
+- Users must authenticate before accessing internal modules.
+- User passwords must be stored only as secure hashes.
+- User email must be unique.
+- A user must have an assigned role.
+- Only Administrator users can create users, update roles, change user status, or reset passwords.
+- Module permissions must be enforced by backend guards and not only by the frontend.
+- User, role, permission, and status changes must be traceable.
+- `docs/database.md` must be updated whenever access-control entities change.

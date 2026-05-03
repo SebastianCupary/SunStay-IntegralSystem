@@ -517,6 +517,18 @@ Management users consult dashboards, reports, indicators, monthly performance, o
 
 ---
 
+## 6.9 Technology and Runtime
+
+**NFR-038** The project must use **Bun** as the official runtime and package manager.
+
+**NFR-039** Project scripts, dependency installation, builds, tests, and development commands must be executed using Bun.
+
+**NFR-040** The project must not reintroduce pnpm, npm, or yarn as package managers.
+
+**NFR-041** Docker and deployment configuration must remain compatible with Bun-based execution.
+
+---
+
 ## 7. Module Summary
 
 The system must include the following modules:
@@ -569,3 +581,117 @@ Before implementing a new feature, define:
 - required permissions
 - documentation updates
 
+
+
+---
+
+## 10. Users, Roles, and Module Access Control Update
+
+The creation of the **Users and Roles** module is required because SunStay controls access to system modules according to internal user roles. The system must allow the Administrator to manage users, assign roles, control account status, and define access permissions from the web interface.
+
+### 10.1 Updated business rules
+
+- Every internal user must authenticate before using the system.
+- Every user must have an assigned role.
+- Only Administrator users can manage users, roles, and permissions.
+- Users must only see sidebar modules authorized by their role.
+- Backend endpoints must validate permissions before executing protected actions.
+- User account statuses must include Active, Inactive, and Blocked.
+- Inactive or blocked users must not be allowed to access internal modules.
+- Passwords must never be stored as plain text.
+- User, role, permission, and account status changes must be traceable.
+
+### 10.2 Base roles and expected access
+
+| Module | Administrator | Receptionist | Inventory Manager | Management |
+|---|---:|---:|---:|---:|
+| Dashboard | Full | Limited | Limited | Full |
+| Reservations | Full | Full | No access | View |
+| Guests | Full | Full | No access | View |
+| Rooms | Full | Full | No access | View |
+| Billing | Full | Create / Update | No access | View |
+| Inventory | Full | No access | Full | View |
+| Staff | Full | No access | No access | View |
+| Attendance | Full | No access | No access | View |
+| Common Areas | Full | Full | No access | View |
+| Reports | Full | No access | No access | Full |
+| Users | Full | No access | No access | No access |
+| Roles / Permissions | Full | No access | No access | No access |
+
+### 10.3 Additional functional requirements
+
+**FR-125** The system must provide a Users module for internal user administration.
+
+**FR-126** The system must allow the Administrator to create internal users.
+
+**FR-127** The system must allow the Administrator to update internal user information.
+
+**FR-128** The system must allow the Administrator to activate, deactivate, or block user accounts.
+
+**FR-129** The system must allow the Administrator to assign a role to each user.
+
+**FR-130** The system must allow the Administrator to reset a user password or generate a temporary password.
+
+**FR-131** The system must allow the Administrator to view user details, including full name, email, phone, role, status, and last access.
+
+**FR-132** The system must provide a Roles and Permissions section.
+
+**FR-133** The system must allow the Administrator to view permissions assigned to each role.
+
+**FR-134** The system must allow the Administrator to configure module access by role.
+
+**FR-135** The system must restrict frontend navigation according to the authenticated user's role.
+
+**FR-136** The system must restrict backend API actions according to the authenticated user's role and permissions.
+
+**FR-137** The system must prevent inactive or blocked users from starting a session.
+
+**FR-138** The system must record user account status changes.
+
+**FR-139** The system must record relevant user and role administration events for traceability.
+
+### 10.4 Additional non-functional requirements
+
+**NFR-033** The system must enforce authorization checks on protected backend endpoints.
+
+**NFR-034** The system must hide unauthorized modules from the sidebar and prevent direct route access.
+
+**NFR-035** The system must use secure password hashing.
+
+**NFR-036** The system must provide clear error messages for unauthorized access.
+
+**NFR-037** The system must maintain traceability for user, role, permission, and status changes.
+
+### 10.5 Updated module list
+
+The system module list must include:
+
+1. Dashboard
+2. Reservations
+3. Guests
+4. Rooms
+5. Stays
+6. Billing and Payments
+7. Inventory
+8. Staff
+9. Attendance and Access Control
+10. Common Areas
+11. Reports
+12. Users
+13. Roles and Permissions
+14. Landing Page
+15. Login and User Profile
+
+### 10.6 Documentation impact
+
+This update also records the complete migration of the project to **Bun** as runtime and package manager.
+
+This update affects:
+
+- `AGENTS.md`
+- `docs/requirements.md`
+- `docs/database.md`
+- `docs/api.md`
+- `docs/architecture.md`
+
+`docs/design.md` is not modified in this update.

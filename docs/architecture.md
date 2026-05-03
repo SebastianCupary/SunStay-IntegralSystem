@@ -1,79 +1,155 @@
-# SunStay Architecture
+# SunStay Architecture Documentation
 
-## Project Overview
+## 1. Purpose
 
-SunStay is an internal hotel management system for Hotel Tropical Sun. It follows a monorepo structure with clear separation between frontend, backend, and shared packages.
+This document describes the project architecture for **SunStay**, including the update required for the **Users, Roles, and Module Access Control** module.
 
-## Created Structure
+SunStay is an internal hotel management system for **Hotel Tropical Sun**. It uses:
 
-The project is organized as a Bun workspace monorepo with the following main areas:
+- Frontend: Next.js + TypeScript
+- Backend: NestJS + TypeScript
+- Database: PostgreSQL
+- ORM: Prisma ORM
+- API style: REST
+- Containers: Docker
+- Cloud target: Azure
+- Runtime and package manager: Bun
 
-### apps/web — Next.js Frontend
+---
 
-- **app/** — App Router pages for each business module (login, dashboard, reservations, guests, rooms, billing, inventory, staff, common-areas, reports)
-- **components/** — Reusable UI components organized by type: layout, ui, tables, forms, modals, charts
-- **features/** — Feature-based modules for business domain logic (reservations, guests, rooms, billing, inventory, staff, common-areas, reports)
-- **hooks/** — Custom React hooks
-- **lib/** — Utility functions and helpers
-- **styles/** — Global styles and design tokens
-- **types/** — TypeScript type definitions
-- **public/** — Static assets
+## 2. Architectural Style
 
-### apps/api — NestJS Backend
+SunStay follows a web client-server architecture with modular organization.
 
-- **src/config/** — Application configuration
-- **src/common/** — Shared utilities, interceptors, filters, pipes
-- **src/modules/** — Business modules: reservations, guests, rooms, billing, inventory, staff, attendance, common-areas, reports, users, roles
-- **src/database/** — Database service and Prisma client configuration
-- **src/auth/** — Authentication and authorization logic
-- **prisma/** — Prisma schema and migrations
+The system is organized into:
 
-### packages/shared
+- frontend application
+- backend API
+- database layer
+- authentication and authorization layer
+- documentation and deployment configuration
 
-- **types/** — Shared TypeScript interfaces and types across frontend and backend
-- **constants/** — Shared constants and enumerations
-- **validators/** — Shared validation schemas
+The backend must enforce business rules and access control. The frontend must improve usability and hide unauthorized modules, but it must not be the only protection layer.
 
-### packages/ui
+## 2.1 Bun Migration Decision
 
-- **components/** — Shared UI components used across the frontend
-- **tokens/** — Design tokens (colors, spacing, typography, badges)
+The project has been migrated completely to **Bun**. Bun is the official runtime and package manager for local development, dependency management, scripts, builds, and tooling execution. The architecture must not assume pnpm, npm, or yarn as package managers.
 
-### docker
+Architectural implications:
 
-- Dockerfiles for web and API services
-- PostgreSQL initialization scripts
+- The monorepo must be managed through Bun workspaces.
+- The root dependency lockfile must be `bun.lock`.
+- Project scripts must be executed with `bun run`.
+- Docker and deployment scripts must be compatible with Bun-based execution.
+- Documentation and setup instructions must use Bun commands.
 
-### docs
+---
 
-- **architecture.md** — This file: architecture documentation
-- **database.md** — Database schema and entity documentation
-- **api.md** — API endpoints and usage documentation
-- **design.md** — UI/UX design decisions
-- **requirements.md** — Business and functional requirements
-- **AGENTS.md** — Project agent instructions and conventions
+## 3. Main Modules
 
-## Technology Stack
+The system includes:
 
-| Component          | Technology                       |
-|--------------------|----------------------------------|
-| Frontend           | Next.js + TypeScript             |
-| Backend            | NestJS + TypeScript              |
-| Database           | PostgreSQL                       |
-| ORM                | Prisma ORM                       |
-| API Style          | REST                             |
-| Package Manager    | Bun                              |
-| Containers         | Docker + Docker Compose          |
-| Cloud Target       | Azure                            |
+1. Dashboard
+2. Reservations
+3. Guests
+4. Rooms
+5. Billing
+6. Inventory
+7. Staff
+8. Attendance
+9. Common Areas
+10. Reports
+11. Users
+12. Roles and Permissions
+13. Authentication
 
-## Architecture Principles
+---
 
-- Bun workspace monorepo with clear package boundaries
-- Modular backend (one NestJS module per business domain)
-- Feature-based frontend organization
-- Shared types and validators to ensure consistency between frontend and backend
-- REST API communication between frontend and backend
-- Prisma ORM for all database access
-- Role-based access control
-- Docker-based local development
-- Cloud-portable configuration via environment variables
+## 4. Users and Roles Architecture
+
+The Users and Roles module supports internal access control.
+
+### Folder structure
+
+**Frontend:**
+- `apps/web/app/users/` — Users list, detail, and administration pages
+- `apps/web/app/roles/` — Roles and permissions management pages
+- `apps/web/app/profile/` — Authenticated user profile, settings, change password
+- `apps/web/features/users/` — Users feature logic (hooks, components, context)
+- `apps/web/features/roles/` — Roles feature logic (hooks, components, context)
+
+**Backend:**
+- `apps/api/src/modules/users/` — Users module (controller, service, DTOs, module)
+- `apps/api/src/modules/roles/` — Roles module (controller, service, DTOs, module)
+- `apps/api/src/auth/` — Authentication module (login, JWT, guards)
+
+### Frontend responsibilities
+
+- Display Users and Roles only to Administrator users.
+- Hide unauthorized sidebar modules according to authenticated user permissions.
+- Protect routes from direct navigation when the user lacks access.
+- Provide user administration screens.
+- Provide role and permission management screens.
+- Display clear unauthorized access states.
+
+### Backend responsibilities
+
+- Authenticate users.
+- Resolve authenticated user role and permissions.
+- Protect endpoints with guards or authorization policies.
+- Prevent inactive or blocked users from accessing the system.
+- Validate user, role, and permission changes.
+- Register traceability for security-relevant changes.
+
+### Database responsibilities
+
+- Store users, roles, modules, and role-module permissions.
+- Store user status and relevant access-control history.
+- Preserve integrity between users, staff records, roles, and permissions.
+
+---
+
+## 5. Authorization Flow
+
+1. User submits credentials from the login page.
+2. Backend validates credentials and user status.
+3. Backend returns authenticated user profile and permissions.
+4. Frontend builds sidebar and routes according to permissions.
+5. User invokes protected operations.
+6. Backend validates permission before executing each protected use case.
+7. Unauthorized requests return a controlled error.
+
+---
+
+## 6. Base Role Access
+
+| Role | Architectural purpose |
+|---|---|
+| Administrator | Full access, including users, roles, permissions, configuration, and operational modules. |
+| Receptionist | Operational access to reservations, guests, rooms, billing, common areas, check-in, and check-out. |
+| Inventory Manager | Access to inventory, products, stock movements, and stock alerts. |
+| Management | Read-oriented access to dashboard, reports, indicators, and summaries. |
+
+---
+
+## 7. Security Notes
+
+- Passwords must be hashed.
+- Plain-text passwords must never be stored.
+- Frontend route hiding is not sufficient for security.
+- Backend authorization guards are mandatory for protected endpoints.
+- User status must be checked during login and protected requests.
+- Administration actions must be auditable.
+
+---
+
+## 8. Documentation Notes
+
+This architecture update affects:
+
+- `AGENTS.md`
+- `requirements.md`
+- `database.md`
+- `api.md`
+
+`design.md` is intentionally not modified in this update.

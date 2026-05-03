@@ -14,6 +14,7 @@ Your main responsibility is to help design, organize, and maintain the initial p
 - Containers: **Docker**
 - Cloud target: **Azure**
 - Language: **TypeScript**
+- Runtime and package manager: **Bun**
 
 This system is not a public guest booking website. It is an internal administrative platform for hotel staff and management.
 
@@ -74,8 +75,37 @@ sunstay/
 ├── apps/
 │   ├── web/
 │   │   ├── app/
+│   │   │   ├── login/
+│   │   │   ├── dashboard/
+│   │   │   ├── reservations/
+│   │   │   ├── guests/
+│   │   │   ├── rooms/
+│   │   │   ├── billing/
+│   │   │   ├── inventory/
+│   │   │   ├── staff/
+│   │   │   ├── common-areas/
+│   │   │   ├── reports/
+│   │   │   ├── users/
+│   │   │   ├── roles/
+│   │   │   └── profile/
 │   │   ├── components/
+│   │   │   ├── layout/
+│   │   │   ├── ui/
+│   │   │   ├── tables/
+│   │   │   ├── forms/
+│   │   │   ├── modals/
+│   │   │   └── charts/
 │   │   ├── features/
+│   │   │   ├── reservations/
+│   │   │   ├── guests/
+│   │   │   ├── rooms/
+│   │   │   ├── billing/
+│   │   │   ├── inventory/
+│   │   │   ├── staff/
+│   │   │   ├── common-areas/
+│   │   │   ├── reports/
+│   │   │   ├── users/
+│   │   │   └── roles/
 │   │   ├── hooks/
 │   │   ├── lib/
 │   │   ├── styles/
@@ -122,15 +152,31 @@ sunstay/
 ├── docker-compose.yml
 ├── .env.example
 ├── package.json
+├── bun.lock
 ├── README.md
 └── AGENTS.md
 ```
 
 ---
 
+## 3.1 Bun Workspace and Tooling Rules
+
+SunStay has been migrated completely to **Bun**. All project structure, scripts, dependency installation, and local execution rules must assume Bun as the only package manager and runtime tool.
+
+Rules:
+
+- Use `bun install` for dependencies.
+- Use `bun run <script>` for project scripts.
+- Use Bun workspaces configured from the root `package.json`.
+- Keep `bun.lock` in the repository.
+- Do not create `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, or `pnpm-workspace.yaml`.
+- Project commands in documentation must be written with Bun.
+- If a tool requires Node compatibility, keep it behind Bun-compatible scripts.
+
+
 ## 4. Frontend Structure Rules
 
-The frontend must be built with **Next.js** and TypeScript.
+The frontend must be built with **Next.js**, TypeScript, and Bun tooling.
 
 Use the following rules:
 
@@ -162,7 +208,10 @@ apps/web/
 │   ├── inventory/
 │   ├── staff/
 │   ├── common-areas/
-│   └── reports/
+│   ├── reports/
+│   ├── users/
+│   ├── roles/
+│   └── profile/
 │
 ├── components/
 │   ├── layout/
@@ -180,7 +229,9 @@ apps/web/
 │   ├── inventory/
 │   ├── staff/
 │   ├── common-areas/
-│   └── reports/
+│   ├── reports/
+│   ├── users/
+│   └── roles/
 │
 ├── hooks/
 ├── lib/
@@ -192,7 +243,7 @@ apps/web/
 
 ## 5. Backend Structure Rules
 
-The backend must be built with **NestJS**, TypeScript, REST APIs, Prisma ORM, and PostgreSQL.
+The backend must be built with **NestJS**, TypeScript, REST APIs, Prisma ORM, PostgreSQL, and Bun tooling.
 
 Use modular architecture.
 
@@ -427,9 +478,9 @@ Do not make structural changes without documenting them.
 
 ---
 
-## 11. Docker and Environment Rules
+## 11. Bun, Docker, and Environment Rules
 
-The project must support Docker-based development.
+The project has been migrated completely to **Bun** as the runtime and package manager. The project must also support Docker-based development.
 
 Required services:
 
@@ -439,9 +490,13 @@ Required services:
 
 Rules:
 
+- Use Bun for dependency installation, scripts, development commands, builds, tests, and Prisma-related scripts.
+- Do not introduce npm, yarn, or pnpm lockfiles.
+- Keep `bun.lock` as the source of dependency lock state.
 - Use `.env.example` to document required environment variables.
 - Never commit real secrets.
 - Use Docker Compose for local development.
+- Docker images and local commands must be compatible with Bun-based execution.
 - Keep database credentials configurable.
 - Keep ports consistent and documented.
 - Make sure local setup can be reproduced by another developer.
@@ -525,6 +580,7 @@ Do not:
 - bypass Prisma for normal database operations
 - commit secrets or credentials
 - change the selected technology stack without justification
+- reintroduce pnpm, npm, or yarn as the project package manager
 - modify design patterns without updating `docs/design.md`
 - modify database structure without updating `docs/database.md`
 
@@ -546,7 +602,7 @@ When asked to create or modify the project structure, the agent must provide:
 The final result must support a professional, scalable, and maintainable hotel management system based on:
 
 ```txt
-Next.js + NestJS + PostgreSQL + Prisma ORM + REST + Docker + Azure
+Next.js + NestJS + PostgreSQL + Prisma ORM + REST + Bun + Docker + Azure
 ```
 
 SunStay must always remain focused on hotel operational management, internal users, data centralization, traceability, reporting, and administrative control.
@@ -556,3 +612,95 @@ SunStay must always remain focused on hotel operational management, internal use
 ## 17. Final Agent Instruction
 
 Follow this `AGENTS.md` strictly. Before creating files, analyze the business module, define its structure, keep the project modular, and update the corresponding documentation files after every structural change.
+
+
+---
+
+## 17. User and Role Management Module Rules
+
+SunStay must include a web-based **Users and Roles** module because internal access is controlled by role. Authentication alone is not enough; administrators must be able to manage users, roles, and module permissions from the system.
+
+### Required frontend areas
+
+Add or maintain the following frontend routes and feature folders:
+
+```txt
+apps/web/app/users/
+apps/web/app/roles/
+apps/web/app/settings/access-control/
+apps/web/features/users/
+apps/web/features/roles/
+apps/web/features/access-control/
+```
+
+The user management interface must include:
+
+- user list
+- user detail
+- new user form
+- edit user form
+- role assignment
+- user status management
+- password reset action
+- permissions summary by role
+
+### Required backend modules
+
+The backend must include or prepare the following modules:
+
+```txt
+apps/api/src/modules/users/
+apps/api/src/modules/roles/
+apps/api/src/modules/permissions/
+apps/api/src/modules/system-modules/
+```
+
+### Required access-control entities
+
+The database model must support:
+
+- `User`
+- `Role`
+- `SystemModule`
+- `RoleModulePermission`
+- `UserStatusHistory`
+- optional `UserSession`
+- optional `PasswordResetToken`
+
+### User statuses
+
+Supported user account statuses:
+
+- Active
+- Inactive
+- Blocked
+
+### Base roles
+
+Required base roles:
+
+- Administrator
+- Receptionist
+- Inventory Manager
+- Management
+
+### Access-control rules
+
+- Only users with the Administrator role can manage users, roles, and permissions.
+- Every internal user must have exactly one active role, unless the system explicitly supports multiple roles in the future.
+- Role permissions must determine which modules appear in the sidebar.
+- Users must not access backend endpoints outside their role permissions.
+- Frontend route protection is not enough; backend guards must enforce authorization.
+- Permission checks must be applied before executing protected use cases.
+- Changes to users, roles, statuses, and permissions must be auditable.
+
+### Documentation update rule
+
+When the Users and Roles module changes, update:
+
+- `docs/requirements.md`
+- `docs/database.md`
+- `docs/api.md`
+- `docs/architecture.md`
+
+Do not update `docs/design.md` unless the change affects visual design or interface patterns.
