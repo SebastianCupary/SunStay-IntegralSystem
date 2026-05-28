@@ -24,18 +24,22 @@ This system is not a public guest booking website. It is an internal administrat
 
 SunStay is a hotel management system designed to centralize and improve the administrative and operational processes of Hotel Tropical Sun.
 
-The system must support the following business modules:
+The system must support the business modules defined in the canonical taxonomy in `docs/requirements.md` section 7:
 
 - Dashboard
-- Reservations
+- Reservations (includes Stays — Check-in / Check-out)
 - Guests
 - Rooms
-- Billing
+- Billing and Payments
 - Inventory
 - Staff
+- Attendance and Access Control
 - Common Areas
 - Reports
-- Users and Roles
+- Users
+- Roles and Permissions
+
+Do not introduce a divergent module list; reference `requirements.md` section 7 as the single source of truth.
 
 The system must consider these business rules:
 
@@ -616,7 +620,7 @@ Follow this `AGENTS.md` strictly. Before creating files, analyze the business mo
 
 ---
 
-## 17. User and Role Management Module Rules
+## 18. User and Role Management Module Rules
 
 SunStay must include a web-based **Users and Roles** module because internal access is controlled by role. Authentication alone is not enough; administrators must be able to manage users, roles, and module permissions from the system.
 
@@ -627,11 +631,11 @@ Add or maintain the following frontend routes and feature folders:
 ```txt
 apps/web/app/users/
 apps/web/app/roles/
-apps/web/app/settings/access-control/
 apps/web/features/users/
 apps/web/features/roles/
-apps/web/features/access-control/
 ```
+
+> Structure decision (2026-05-28): permissions and module-access configuration are managed **inside the `roles/` feature** (the Roles and Permissions module). There is no separate `settings/access-control/` route or `features/access-control/` folder.
 
 The user management interface must include:
 
@@ -651,9 +655,9 @@ The backend must include or prepare the following modules:
 ```txt
 apps/api/src/modules/users/
 apps/api/src/modules/roles/
-apps/api/src/modules/permissions/
-apps/api/src/modules/system-modules/
 ```
+
+> Structure decision (2026-05-28): `SystemModule` and `RoleModulePermission` logic lives **inside the `roles/` module** (e.g. `roles/permissions.service.ts`, `roles/system-modules.controller.ts`). There are no separate `permissions/` or `system-modules/` modules. Check-in / check-out (`Stay`) is handled **inside the `reservations/` module**, not a standalone `stays/` module.
 
 ### Required access-control entities
 

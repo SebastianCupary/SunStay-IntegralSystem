@@ -471,10 +471,12 @@ The landing page must not look like a guest booking website.
 UX labels:
 
 - `Iniciar Sesión`
-- `Usuario o correo`
+- `Correo electrónico`
 - `Contraseña`
 - `¿Olvidaste tu contraseña?`
 - `Verificando...`
+
+> Login uses the user **email** as the only credential (there is no username). See `api.md` §3 and `database.md` §18.2.
 
 States:
 
@@ -579,10 +581,10 @@ Required guest fields:
 - `Teléfono`
 - `Email`
 - `Nacionalidad`
-- `Año de nacimiento`
-- `Sexo`
-- `Profesión`
-- `Ciudad de origen`
+- `Año de nacimiento` (Guest.birthYear)
+- `Sexo` (Guest.sex)
+- `Profesión` (Guest.profession)
+- `Ciudad de origen` (Guest.originCity)
 
 Guest statuses:
 
@@ -713,18 +715,18 @@ Must support:
 - attendance view;
 - status update.
 
-Staff statuses:
+Staff statuses (UX labels; stored values in `database.md` §11.1):
 
-- `Activo`
-- `Vacaciones`
-- `Permiso Médico`
+- `Activo` (stored: `Active`)
+- `Vacaciones` (stored: `OnVacation`)
+- `Permiso Médico` (stored: `MedicalLeave`)
 
-Attendance statuses:
+Attendance statuses (derived UI states; reconciled with stored `attendanceStatus` in `database.md` §11.1):
 
-- `Pendiente`
-- `Registrado`
-- `Salida Registrada`
-- `No Disponible`
+- `Pendiente` (no attendance record yet)
+- `Registrado` (entry recorded — stored `Present` / `Late`)
+- `Salida Registrada` (exit recorded — stored `Completed`)
+- `No Disponible` (stored `Absent` / `Permission`)
 
 Main actions:
 

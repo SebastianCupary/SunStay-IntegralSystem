@@ -47,21 +47,22 @@ Architectural implications:
 
 ## 3. Main Modules
 
-The system includes:
+The canonical module taxonomy is defined in `requirements.md` section 7. The business modules are:
 
 1. Dashboard
-2. Reservations
+2. Reservations (includes Stays — Check-in / Check-out)
 3. Guests
 4. Rooms
-5. Billing
+5. Billing and Payments
 6. Inventory
 7. Staff
-8. Attendance
+8. Attendance and Access Control
 9. Common Areas
 10. Reports
 11. Users
 12. Roles and Permissions
-13. Authentication
+
+**Authentication** is a cross-cutting backend layer (`apps/api/src/auth/`), not a business module. It is not listed as a sidebar module.
 
 ---
 

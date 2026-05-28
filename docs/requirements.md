@@ -413,7 +413,7 @@ Management users consult dashboards, reports, indicators, monthly performance, o
 
 **FR-122** The Login button must redirect to a dedicated login view.
 
-**FR-123** The login view must include username or email, password, forgot password link, loading state, and error state.
+**FR-123** The login view must include email, password, forgot password link, loading state, and error state. The login credential is the user email; there is no separate username.
 
 **FR-124** The system must redirect users after login according to their role.
 
@@ -519,6 +519,8 @@ Management users consult dashboards, reports, indicators, monthly performance, o
 
 ## 6.9 Technology and Runtime
 
+> Numbering note: NFR-033 through NFR-037 are the access-control non-functional requirements defined later in section 10.4 (added with the Users and Roles update). The sequence is therefore: NFR-001–032 (sections 6.1–6.8), NFR-033–037 (section 10.4), NFR-038–041 (this section).
+
 **NFR-038** The project must use **Bun** as the official runtime and package manager.
 
 **NFR-039** Project scripts, dependency installation, builds, tests, and development commands must be executed using Bun.
@@ -529,24 +531,36 @@ Management users consult dashboards, reports, indicators, monthly performance, o
 
 ---
 
-## 7. Module Summary
+## 7. Module Summary (Canonical Taxonomy)
 
-The system must include the following modules:
+This section is the **single source of truth** for the module list. `architecture.md`, `AGENTS.md`, and `design.md` must reference this taxonomy and not introduce divergent lists.
+
+### 7.1 Business modules (own sidebar entry)
 
 1. Dashboard
 2. Reservations
 3. Guests
 4. Rooms
-5. Stays
-6. Billing and Payments
-7. Inventory
-8. Staff
-9. Attendance and Access Control
-10. Common Areas
-11. Reports
-12. Users and Roles
-13. Landing Page
-14. Login and User Profile
+5. Billing and Payments
+6. Inventory
+7. Staff
+8. Attendance and Access Control
+9. Common Areas
+10. Reports
+11. Users
+12. Roles and Permissions
+
+### 7.2 Submodules / views (no independent sidebar entry)
+
+- **Stays (Check-in / Check-out)** — part of the Reservations module. See `api.md` §8.1.
+
+### 7.3 Non-modular pages
+
+- Landing Page
+- Login
+- User Profile
+
+> Note: `Roles and Permissions` is reached from the `Users` area and is visible only to Administrator users; in the sidebar both are represented under a single `Usuarios` entry (see `design.md` §11.1).
 
 ---
 
@@ -664,23 +678,7 @@ The creation of the **Users and Roles** module is required because SunStay contr
 
 ### 10.5 Updated module list
 
-The system module list must include:
-
-1. Dashboard
-2. Reservations
-3. Guests
-4. Rooms
-5. Stays
-6. Billing and Payments
-7. Inventory
-8. Staff
-9. Attendance and Access Control
-10. Common Areas
-11. Reports
-12. Users
-13. Roles and Permissions
-14. Landing Page
-15. Login and User Profile
+The canonical module taxonomy is defined in section 7 (Module Summary). The Users and Roles update confirms that **Users** and **Roles and Permissions** are both first-class business modules (items 11 and 12 in section 7.1). Refer to section 7 for the authoritative list; do not maintain a separate enumeration here.
 
 ### 10.6 Documentation impact
 
