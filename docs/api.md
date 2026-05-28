@@ -29,7 +29,7 @@ All API development commands, scripts, dependency installation, builds, tests, a
 
 | Method | Route | Purpose | Access |
 |---|---|---|---|
-| POST | `/api/auth/login` | Authenticate internal user. | Public |
+| POST | `/api/auth/login` | Authenticate internal user. Login credential is the unique **email**; there is no `username`. | Public |
 | POST | `/api/auth/logout` | Close current session. | Authenticated |
 | GET | `/api/auth/me` | Return authenticated user profile and permissions. | Authenticated |
 | PATCH | `/api/auth/change-password` | Change own password. | Authenticated |
@@ -144,6 +144,18 @@ Example response structure:
 | Validation error | 400 Bad Request |
 | Resource not found | 404 Not Found |
 | Duplicate user email | 409 Conflict |
+
+---
+
+## 8.1 Stays (Check-in / Check-out)
+
+There is no standalone `Stay` module. Check-in and check-out are part of the **Reservations** module and exposed as sub-resources of a reservation. The `Stay` entity (see `database.md`) is created and updated through these endpoints.
+
+| Method | Route | Purpose |
+|---|---|---|
+| POST | `/api/reservations/:id/check-in` | Register guest check-in and create/update the stay. |
+| POST | `/api/reservations/:id/check-out` | Register guest check-out and close the stay. |
+| GET | `/api/reservations/:id/stay` | View the stay linked to a reservation. |
 
 ---
 

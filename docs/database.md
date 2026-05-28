@@ -142,7 +142,9 @@ updatedAt
 deletedAt
 ```
 
-Use `deletedAt` only if soft deletion is required.
+**Decision (resolved):** SunStay adopts **soft deletion** on operational tables. Operational entities (Reservation, Guest, Room, Invoice, Staff, Product, CommonAreaReservation, User, etc.) include a nullable `deletedAt` field. Pure catalog tables (statuses, methods, roles, modules) do not require `deletedAt`.
+
+**Decision (resolved):** primary keys use **UUID** (`@default(uuid())`) across all tables.
 
 ---
 
@@ -399,13 +401,20 @@ Stores guest information.
 | phone | String | Contact phone. |
 | email | String | Contact email. |
 | nationality | String | Guest nationality. |
+| birthYear | Int | Year of birth. Optional. |
+| sex | String | Guest sex. Optional. |
+| profession | String | Guest profession. Optional. |
+| originCity | String | City of origin. Optional. |
 | createdAt | DateTime | Creation date. |
 | updatedAt | DateTime | Last update date. |
+| deletedAt | DateTime | Soft-delete timestamp. Nullable. |
 
 Relationships:
 
 - One guest can be linked to many reservations through ReservationGuest.
 - One guest can request many common area reservations.
+
+> Privacy note: `sex`, `profession`, and other personal guest attributes must be handled according to the data-protection rules in section 14.
 
 ---
 
@@ -787,19 +796,15 @@ Relationships:
 
 ## 7.24 User
 
-Stores internal system users.
+> **Canonical definition:** the authoritative `User` schema is defined in section 18.2 (User, Role, and Module Access Control Update). This section is kept only as a cross-reference to avoid a duplicated, divergent definition.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| staffId | FK | Related staff member. |
-| roleId | FK | Assigned role. |
-| username | String | Login username. |
-| passwordHash | String | Hashed password. |
-| status | String | User status. |
-| lastAccessAt | DateTime | Last login date and time. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+Stores internal system users who authenticate and access SunStay.
+
+Key points of the canonical definition (see 18.2):
+
+- Login credential is the unique `email` field. There is no `username` field.
+- `staffId` is **nullable**, so administrative users without a staff record are allowed.
+- Core fields: `id`, `staffId?`, `roleId`, `fullName`, `email` (`@unique`), `phone?`, `passwordHash`, `status` (Active | Inactive | Blocked), `lastAccessAt?`, `createdAt`, `updatedAt`, `deletedAt?`.
 
 Relationships:
 
@@ -807,12 +812,13 @@ Relationships:
 - One role can be assigned to many users.
 - One user can generate many reports.
 - One user can perform many reservation status changes.
+- One user can have many status history records.
 
 Security rules:
 
-- Passwords must never be stored in plain text.
-- Users must be linked to internal staff.
+- Passwords must never be stored in plain text; store only secure hashes.
 - Access must be controlled by role.
+- User email must be unique.
 
 ---
 
@@ -1186,7 +1192,7 @@ model RoomType {
   name        String
   description String?
   capacity    Int
-  baseRate    Decimal
+  baseRate    Decimal  @db.Decimal(12, 2)
   rooms       Room[]
 }
 
@@ -1213,6 +1219,7 @@ model Room {
   reservationDetails ReservationDetail[]
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
+  deletedAt      DateTime?
 }
 
 model RoomStatusHistory {
@@ -1246,10 +1253,15 @@ model Guest {
   phone            String?
   email            String?
   nationality      String?
+  birthYear        Int?
+  sex              String?
+  profession       String?
+  originCity       String?
   reservationGuests ReservationGuest[]
   commonAreaReservations CommonAreaReservation[]
   createdAt        DateTime                @default(now())
   updatedAt        DateTime                @updatedAt
+  deletedAt        DateTime?
 }
 
 model ReservationStatus {
@@ -1270,7 +1282,7 @@ model Reservation {
   checkOutDate        DateTime
   guestQuantity       Int
   reservationChannel  String?
-  estimatedAmount     Decimal?
+  estimatedAmount     Decimal?                   @db.Decimal(12, 2)
   observation         String?
   hotel               Hotel                      @relation(fields: [hotelId], references: [id])
   reservationHolder   ReservationHolder          @relation(fields: [reservationHolderId], references: [id])
@@ -1282,6 +1294,7 @@ model Reservation {
   invoice             Invoice?
   createdAt           DateTime                   @default(now())
   updatedAt           DateTime                   @updatedAt
+  deletedAt           DateTime?
 }
 
 model ReservationGuest {
@@ -1300,9 +1313,9 @@ model ReservationDetail {
   id             String      @id @default(uuid())
   reservationId  String
   roomId         String
-  appliedRate    Decimal
+  appliedRate    Decimal     @db.Decimal(12, 2)
   nightsQuantity Int
-  subtotal       Decimal
+  subtotal       Decimal     @db.Decimal(12, 2)
   reservation    Reservation @relation(fields: [reservationId], references: [id])
   room           Room        @relation(fields: [roomId], references: [id])
 }
@@ -1349,13 +1362,14 @@ model Invoice {
   paymentStatusId String
   paymentMethodId String
   issueDate       DateTime        @default(now())
-  total           Decimal
+  total           Decimal         @db.Decimal(12, 2)
   reservation     Reservation     @relation(fields: [reservationId], references: [id])
   paymentStatus   PaymentStatus   @relation(fields: [paymentStatusId], references: [id])
   paymentMethod   PaymentMethod   @relation(fields: [paymentMethodId], references: [id])
   details         InvoiceDetail[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
 }
 
 model InvoiceDetail {
@@ -1363,8 +1377,8 @@ model InvoiceDetail {
   invoiceId String
   concept   String
   quantity  Int
-  unitPrice Decimal
-  subtotal  Decimal
+  unitPrice Decimal @db.Decimal(12, 2)
+  subtotal  Decimal @db.Decimal(12, 2)
   invoice   Invoice @relation(fields: [invoiceId], references: [id])
 }
 
@@ -1403,6 +1417,7 @@ model Staff {
   user                User?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+  deletedAt           DateTime?
 }
 
 model StaffAttendance {
@@ -1427,26 +1442,86 @@ model StaffAccessControl {
 }
 
 model Role {
-  id          String @id @default(uuid())
-  name        String @unique
-  description String?
-  users       User[]
+  id           String                 @id @default(uuid())
+  name         String                 @unique
+  description  String?
+  isSystemRole Boolean                @default(false)
+  users        User[]
+  permissions  RoleModulePermission[]
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
 }
 
 model User {
   id           String                     @id @default(uuid())
-  staffId      String                     @unique
+  staffId      String?                    @unique
   roleId       String
-  username     String                     @unique
+  fullName     String
+  email        String                     @unique
+  phone        String?
   passwordHash String
-  status       String
+  status       String                     @default("Active")
   lastAccessAt DateTime?
-  staff        Staff                      @relation(fields: [staffId], references: [id])
+  staff        Staff?                     @relation(fields: [staffId], references: [id])
   role         Role                       @relation(fields: [roleId], references: [id])
   reservationStatusHistories ReservationStatusHistory[]
   reports      Report[]
+  statusHistories UserStatusHistory[]     @relation("UserStatusHistory_user")
+  statusChangesMade UserStatusHistory[]   @relation("UserStatusHistory_changedBy")
+  passwordResetTokens PasswordResetToken[]
   createdAt    DateTime                   @default(now())
   updatedAt    DateTime                   @updatedAt
+  deletedAt    DateTime?
+}
+
+model SystemModule {
+  id          String                 @id @default(uuid())
+  name        String
+  code        String                 @unique
+  route       String
+  description String?
+  isActive    Boolean                @default(true)
+  permissions RoleModulePermission[]
+}
+
+model RoleModulePermission {
+  id             String       @id @default(uuid())
+  roleId         String
+  systemModuleId String
+  canView        Boolean      @default(false)
+  canCreate      Boolean      @default(false)
+  canUpdate      Boolean      @default(false)
+  canDelete      Boolean      @default(false)
+  canExport      Boolean      @default(false)
+  canManage      Boolean      @default(false)
+  role           Role         @relation(fields: [roleId], references: [id])
+  systemModule   SystemModule @relation(fields: [systemModuleId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([roleId, systemModuleId])
+}
+
+model UserStatusHistory {
+  id              String   @id @default(uuid())
+  userId          String
+  previousStatus  String
+  newStatus       String
+  changedByUserId String
+  changeDateTime  DateTime @default(now())
+  reason          String?
+  user            User     @relation("UserStatusHistory_user", fields: [userId], references: [id])
+  changedByUser   User     @relation("UserStatusHistory_changedBy", fields: [changedByUserId], references: [id])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 model InventoryArea {
@@ -1471,18 +1546,19 @@ model Product {
   name              String
   description       String?
   unitOfMeasure     String
-  minimumStock      Decimal
+  minimumStock      Decimal         @db.Decimal(12, 3)
   productCategory   ProductCategory @relation(fields: [productCategoryId], references: [id])
   inventories       Inventory[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
 }
 
 model Inventory {
   id              String              @id @default(uuid())
   inventoryAreaId String
   productId       String
-  currentStock    Decimal
+  currentStock    Decimal             @db.Decimal(12, 3)
   updatedAt       DateTime            @updatedAt
   inventoryArea   InventoryArea       @relation(fields: [inventoryAreaId], references: [id])
   product         Product             @relation(fields: [productId], references: [id])
@@ -1497,7 +1573,7 @@ model InventoryMovement {
   staffId      String
   movementDate DateTime  @default(now())
   movementType String
-  quantity     Decimal
+  quantity     Decimal   @db.Decimal(12, 3)
   reason       String?
   inventory    Inventory @relation(fields: [inventoryId], references: [id])
   staff        Staff     @relation(fields: [staffId], references: [id])
@@ -1530,6 +1606,7 @@ model CommonAreaReservation {
   guest           Guest      @relation(fields: [guestId], references: [id])
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
 }
 
 model ReportType {
@@ -1642,6 +1719,35 @@ Monthly Performance Report
 
 ---
 
+## 11.1 Status Taxonomy and UX Mapping
+
+Stored status values are kept in English; the UI displays Spanish labels (see `design.md`). The following mappings are canonical and must be used consistently across backend and frontend.
+
+### Staff status (`Staff.status`)
+
+| Stored value | UX label (Spanish) |
+|---|---|
+| Active | `Activo` |
+| OnVacation | `Vacaciones` |
+| MedicalLeave | `Permiso Médico` |
+
+### Attendance status (`StaffAttendance.attendanceStatus`)
+
+The data model stores the canonical operational outcome; the UI may derive intermediate display states (`Pendiente`, `Registrado`, `Salida Registrada`, `No Disponible`) from the stored value plus the entry/exit timestamps.
+
+| Stored value | UX label (Spanish) | Derived UI state |
+|---|---|---|
+| Present | `Presente` | `Registrado` once entry is recorded |
+| Absent | `Ausente` | `No Disponible` |
+| Late | `Tarde` | `Registrado` |
+| Permission | `Permiso` | `No Disponible` |
+| Completed | `Finalizada` | `Salida Registrada` after exit is recorded |
+| (no record yet) | — | `Pendiente` |
+
+> `design.md` §13.10 lists the derived UI states. This table reconciles them with the stored `attendanceStatus` values so both documents agree.
+
+---
+
 ## 12. Reporting Data Strategy
 
 SunStay reports should primarily be generated from operational tables.
@@ -1722,13 +1828,16 @@ When modifying the database:
 
 ## 16. Pending Decisions
 
-The following decisions must be validated during implementation:
+Resolved decisions (2026-05-28):
 
-- Whether IDs will use UUIDs or numeric auto-increment values.
-- Whether soft delete will be used for operational tables.
+- **Primary keys:** UUID (`@default(uuid())`) for all tables. (Resolved)
+- **Soft delete:** enabled via nullable `deletedAt` on operational tables; catalog tables excluded. (Resolved)
+- **Payment table:** no separate `Payment` table for now. Partial payments are tracked through `Invoice.paymentStatus` (`Parcial`). A dedicated `Payment` table may be introduced later if partial-payment history is required. (Resolved)
+
+Still open, to be validated during implementation:
+
 - Whether CommonAreaReservation should be linked directly to Reservation as well as Guest.
-- Whether payment records should be separated into a dedicated Payment table for partial payments.
-- Whether audit logs will be implemented as a generic table.
+- Whether audit logs will be implemented as a generic table (beyond the existing history tables).
 - Whether reports will store only metadata or also full report snapshots.
 
 ---
@@ -1742,11 +1851,11 @@ The following decisions must be validated during implementation:
 
 ---
 
-## 10. User, Role, and Module Access Control Update
+## 18. User, Role, and Module Access Control Update
 
 The system requires a web-based user administration module because access to SunStay modules is controlled by role. The database must therefore support users, roles, system modules, role permissions, account status tracking, and security-related records.
 
-### 10.1 Access-control entities
+### 18.1 Access-control entities
 
 | Entity | Purpose |
 |---|---|
@@ -1758,23 +1867,24 @@ The system requires a web-based user administration module because access to Sun
 | UserSession | Stores active or historical login sessions when required. |
 | PasswordResetToken | Stores temporary password reset requests when required. |
 
-### 10.2 User
+### 18.2 User (canonical definition)
 
-Stores internal user accounts for system access.
+Stores internal user accounts for system access. This is the authoritative `User` definition for the whole project; section 7.24 only cross-references it.
 
 | Field | Type | Description |
 |---|---|---|
-| id | UUID / Int | Primary key. |
+| id | UUID | Primary key. |
 | staffId | FK / Nullable | Related staff member, when the user belongs to hotel staff. |
 | roleId | FK | Assigned system role. |
 | fullName | String | User full name. |
-| email | String | Login email or contact email. Must be unique. |
+| email | String | **Login credential.** Must be unique. There is no separate `username` field. |
 | phone | String / Nullable | Contact phone. |
 | passwordHash | String | Secure password hash. Never store plain-text passwords. |
 | status | String / Catalog | Active, Inactive, or Blocked. |
 | lastAccessAt | DateTime / Nullable | Last successful access. |
 | createdAt | DateTime | Creation date. |
 | updatedAt | DateTime | Last update date. |
+| deletedAt | DateTime / Nullable | Soft-delete timestamp. |
 
 Relationships:
 
@@ -1784,7 +1894,7 @@ Relationships:
 - One user can perform many audited actions.
 - One user can have many status history records.
 
-### 10.3 Role
+### 18.3 Role
 
 Defines access profiles for internal users.
 
@@ -1809,7 +1919,7 @@ Relationships:
 - One role can be assigned to many users.
 - One role can have many module permissions.
 
-### 10.4 SystemModule
+### 18.4 SystemModule
 
 Catalog of modules that can be shown, hidden, or restricted according to role.
 
@@ -1841,7 +1951,7 @@ Relationships:
 
 - One system module can appear in many role permission records.
 
-### 10.5 RoleModulePermission
+### 18.5 RoleModulePermission
 
 Defines permissions granted to each role over each system module.
 
@@ -1870,7 +1980,7 @@ Recommended unique constraint:
 roleId + systemModuleId
 ```
 
-### 10.6 UserStatusHistory
+### 18.6 UserStatusHistory
 
 Tracks status changes for user accounts.
 
@@ -1884,7 +1994,7 @@ Tracks status changes for user accounts.
 | changeDateTime | DateTime | Date and time of change. |
 | reason | String / Nullable | Reason or observation. |
 
-### 10.7 PasswordResetToken
+### 18.7 PasswordResetToken
 
 Stores temporary password reset records when password reset is implemented.
 
@@ -1897,7 +2007,7 @@ Stores temporary password reset records when password reset is implemented.
 | usedAt | DateTime / Nullable | Usage date and time. |
 | createdAt | DateTime | Creation date. |
 
-### 10.8 Access-control database rules
+### 18.8 Access-control database rules
 
 - Users must authenticate before accessing internal modules.
 - User passwords must be stored only as secure hashes.
