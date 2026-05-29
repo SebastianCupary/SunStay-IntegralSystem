@@ -21,10 +21,13 @@
   },
   "dependencies": {
     "@nestjs/common": "latest",
+    "@nestjs/config": "latest",
     "@nestjs/core": "latest",
     "@nestjs/platform-express": "latest",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "latest",
+    "class-transformer": "latest",
+    "class-validator": "latest",
     "pg": "^8.21.0",
     "reflect-metadata": "latest",
     "rxjs": "latest"
@@ -33,6 +36,7 @@
     "@nestjs/cli": "latest",
     "@nestjs/schematics": "latest",
     "@types/bun": "^1.3.14",
+    "@types/express": "^5.0.6",
     "@types/node": "latest",
     "prisma": "latest",
     "typescript": "latest"
