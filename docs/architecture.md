@@ -156,3 +156,42 @@ This architecture update affects:
 - `api.md`
 
 `design.md` is intentionally not modified in this update.
+
+---
+
+## 9. API Bootstrap
+
+The API application entry point (`apps/api/src/main.ts`) bootstraps NestJS with the following components:
+
+- **ConfigModule** — loads environment variables from `../../.env` (monorepo root)
+- **DatabaseModule** — global module providing `PrismaService` (extends `PrismaClient` with `PrismaPg` adapter, `OnModuleInit/$connect`, `OnModuleDestroy/$disconnect`)
+- **HealthModule** — exposes `GET /api/health` which runs `prisma.$queryRaw\`SELECT 1\`` to verify database connectivity
+
+Global middleware applied in `main.ts`:
+
+- `ValidationPipe` — `whitelist: true, transform: true`
+- `HttpExceptionFilter` — consistent error format `{ statusCode, message, error, timestamp, path }`
+- `TransformInterceptor` — wraps responses in `{ data, timestamp }`
+- CORS enabled for the browser origin in `WEB_ORIGIN` (defaults to `http://localhost:3000`)
+
+API prefix is set to `api` (stripping any leading slash from `API_PREFIX` env var).
+
+---
+
+## 10. Web Application Bootstrap
+
+The Next.js web application (`apps/web`) provides:
+
+- Root layout (`app/layout.tsx`) with SunStay metadata and CSS design tokens
+- Home page (`app/page.tsx`) redirects to `/login`
+- Login page (`app/login/page.tsx`) — static placeholder using SunStay design tokens
+- `lib/api.ts` — typed fetch wrapper using `NEXT_PUBLIC_API_URL`
+
+Environment boundaries:
+
+- `WEB_ORIGIN` defines the allowed browser origin for API CORS checks.
+- `NEXT_PUBLIC_API_URL` defines the API base URL used by the web application.
+
+Design tokens (defined in `app/globals.css`):
+
+- Primary: `#0d4c6f` | Accent: `#f5a623` | Base font: `14px` | Spacing unit: `8px`

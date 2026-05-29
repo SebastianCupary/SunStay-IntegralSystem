@@ -33,6 +33,60 @@ Dashboard data is aggregated from multiple modules. Specific endpoints are pendi
 
 ---
 
+## 3.2 Health Endpoint
+
+| Method | Route             | Purpose                                              | Access |
+| ------ | ----------------- | ---------------------------------------------------- | ------ |
+| GET    | `/api/health`     | Verifies API and database connectivity               | Public |
+
+**Success response (200):**
+
+```json
+{
+  "data": {
+    "status": "ok",
+    "db": "up"
+  },
+  "timestamp": "2026-05-29T00:30:00.000Z"
+}
+```
+
+**Error response (503 when DB is down):**
+
+```json
+{
+  "statusCode": 503,
+  "message": "Database health check failed",
+  "error": "ServiceUnavailableException",
+  "timestamp": "2026-05-29T00:30:00.000Z",
+  "path": "/api/health"
+}
+```
+
+**Consistent response envelope:**
+
+All responses are wrapped by `TransformInterceptor`:
+```json
+{
+  "data": { ... },
+  "timestamp": "2026-05-29T00:30:00.000Z"
+}
+```
+
+**Consistent error format (HttpExceptionFilter):**
+
+```json
+{
+  "statusCode": 400,
+  "message": "Validation failed",
+  "error": "Bad Request",
+  "timestamp": "2026-05-29T00:30:00.000Z",
+  "path": "/api/reservations"
+}
+```
+
+---
+
 ## 3. Authentication Endpoints
 
 | Method | Route                       | Purpose                                                                                       | Access              |
