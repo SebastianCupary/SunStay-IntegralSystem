@@ -73,6 +73,7 @@ The Users and Roles module supports internal access control.
 ### Folder structure
 
 **Frontend:**
+
 - `apps/web/app/users/` — Users list, detail, and administration pages
 - `apps/web/app/roles/` — Roles and permissions management pages
 - `apps/web/app/profile/` — Authenticated user profile, settings, change password
@@ -80,6 +81,7 @@ The Users and Roles module supports internal access control.
 - `apps/web/features/roles/` — Roles feature logic (hooks, components, context)
 
 **Backend:**
+
 - `apps/api/src/modules/users/` — Users module (controller, service, DTOs, module)
 - `apps/api/src/modules/roles/` — Roles module (controller, service, DTOs, module)
 - `apps/api/src/auth/` — Authentication module (login, JWT, guards)
@@ -124,12 +126,12 @@ The Users and Roles module supports internal access control.
 
 ## 6. Base Role Access
 
-| Role | Architectural purpose |
-|---|---|
-| Administrator | Full access, including users, roles, permissions, configuration, and operational modules. |
-| Receptionist | Operational access to reservations, guests, rooms, billing, common areas, check-in, and check-out. |
-| Inventory Manager | Access to inventory, products, stock movements, and stock alerts. |
-| Management | Read-oriented access to dashboard, reports, indicators, and summaries. |
+| Role              | Architectural purpose                                                                              |
+| ----------------- | -------------------------------------------------------------------------------------------------- |
+| Administrator     | Full access, including users, roles, permissions, configuration, and operational modules.          |
+| Receptionist      | Operational access to reservations, guests, rooms, billing, common areas, check-in, and check-out. |
+| Inventory Manager | Access to inventory, products, stock movements, and stock alerts.                                  |
+| Management        | Read-oriented access to dashboard, reports, indicators, and summaries.                             |
 
 ---
 
@@ -154,3 +156,42 @@ This architecture update affects:
 - `api.md`
 
 `design.md` is intentionally not modified in this update.
+
+---
+
+## 9. API Bootstrap
+
+The API application entry point (`apps/api/src/main.ts`) bootstraps NestJS with the following components:
+
+- **ConfigModule** — loads environment variables from `../../.env` (monorepo root)
+- **DatabaseModule** — global module providing `PrismaService` (extends `PrismaClient` with `PrismaPg` adapter, `OnModuleInit/$connect`, `OnModuleDestroy/$disconnect`)
+- **HealthModule** — exposes `GET /api/health` which runs `prisma.$queryRaw\`SELECT 1\`` to verify database connectivity
+
+Global middleware applied in `main.ts`:
+
+- `ValidationPipe` — `whitelist: true, transform: true`
+- `HttpExceptionFilter` — consistent error format `{ statusCode, message, error, timestamp, path }`
+- `TransformInterceptor` — wraps responses in `{ data, timestamp }`
+- CORS enabled for the browser origin in `WEB_ORIGIN` (defaults to `http://localhost:3000`)
+
+API prefix is set to `api` (stripping any leading slash from `API_PREFIX` env var).
+
+---
+
+## 10. Web Application Bootstrap
+
+The Next.js web application (`apps/web`) provides:
+
+- Root layout (`app/layout.tsx`) with SunStay metadata and CSS design tokens
+- Home page (`app/page.tsx`) redirects to `/login`
+- Login page (`app/login/page.tsx`) — static placeholder using SunStay design tokens
+- `lib/api.ts` — typed fetch wrapper using `NEXT_PUBLIC_API_URL`
+
+Environment boundaries:
+
+- `WEB_ORIGIN` defines the allowed browser origin for API CORS checks.
+- `NEXT_PUBLIC_API_URL` defines the API base URL used by the web application.
+
+Design tokens (defined in `app/globals.css`):
+
+- Primary: `#0d4c6f` | Accent: `#f5a623` | Base font: `14px` | Spacing unit: `8px`

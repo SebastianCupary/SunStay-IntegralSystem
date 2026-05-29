@@ -1,4 +1,4 @@
-# AGENTS.md
+# CLAUDE.md
 
 ## Project Agent: SunStay Structure Agent
 

@@ -7,18 +7,18 @@
  * both the Prisma CLI (via prisma.config.ts) and the seed script work
  * regardless of the current working directory.
  */
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
 // prisma/load-env.ts -> apps/api/prisma -> repo root is three levels up.
-const rootEnv = path.resolve(__dirname, '../../../.env');
+const rootEnv = path.resolve(__dirname, "../../../.env");
 
 if (fs.existsSync(rootEnv)) {
-  const content = fs.readFileSync(rootEnv, 'utf8');
+  const content = fs.readFileSync(rootEnv, "utf8");
   for (const rawLine of content.split(/\r?\n/)) {
     const line = rawLine.trim();
-    if (!line || line.startsWith('#')) continue;
-    const eq = line.indexOf('=');
+    if (!line || line.startsWith("#")) continue;
+    const eq = line.indexOf("=");
     if (eq === -1) continue;
     const key = line.slice(0, eq).trim();
     let value = line.slice(eq + 1).trim();

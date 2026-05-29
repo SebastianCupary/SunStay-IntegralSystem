@@ -95,24 +95,24 @@ Documentation can be in English, but the visible interface must use Spanish.
 
 Examples:
 
-| Context | Use in UI |
-|---|---|
-| Dashboard title | `Dashboard` |
-| Reservations | `Reservas` |
-| Guests | `Huéspedes` |
-| Rooms | `Habitaciones` |
-| Billing | `Facturación` |
-| Inventory | `Inventario` |
-| Staff | `Personal` |
-| Common Areas | `Áreas comunes` |
-| Reports | `Reportes` |
-| Users and Roles | `Usuarios y Roles` |
-| New reservation | `Nueva Reserva` |
-| Register guest | `Registrar Huésped` |
-| Generate report | `Generar Reporte` |
-| Export | `Exportar` |
-| Save changes | `Guardar Cambios` |
-| Cancel | `Cancelar` |
+| Context         | Use in UI           |
+| --------------- | ------------------- |
+| Dashboard title | `Dashboard`         |
+| Reservations    | `Reservas`          |
+| Guests          | `Huéspedes`         |
+| Rooms           | `Habitaciones`      |
+| Billing         | `Facturación`       |
+| Inventory       | `Inventario`        |
+| Staff           | `Personal`          |
+| Common Areas    | `Áreas comunes`     |
+| Reports         | `Reportes`          |
+| Users and Roles | `Usuarios y Roles`  |
+| New reservation | `Nueva Reserva`     |
+| Register guest  | `Registrar Huésped` |
+| Generate report | `Generar Reporte`   |
+| Export          | `Exportar`          |
+| Save changes    | `Guardar Cambios`   |
+| Cancel          | `Cancelar`          |
 
 Statuses must also remain in Spanish:
 
@@ -162,13 +162,13 @@ Statuses must also remain in Spanish:
 
 ### 5.3 Status Color Meaning
 
-| Color | Meaning | Examples |
-|---|---|---|
-| Success | Positive or available state | `Disponible`, `Pagado`, `Presente`, `Activo` |
-| Warning | Attention required | `Pendiente`, `Limpieza`, `Stock Bajo`, `Vacaciones` |
-| Destructive | Critical or blocked state | `Cancelada`, `Mantenimiento`, `Agotado`, `Ausente` |
-| Info | Informational or active process | `Check-in`, `En Uso`, `Parcial` |
-| Default | Neutral state | `Finalizada`, `Inactivo` |
+| Color       | Meaning                         | Examples                                            |
+| ----------- | ------------------------------- | --------------------------------------------------- |
+| Success     | Positive or available state     | `Disponible`, `Pagado`, `Presente`, `Activo`        |
+| Warning     | Attention required              | `Pendiente`, `Limpieza`, `Stock Bajo`, `Vacaciones` |
+| Destructive | Critical or blocked state       | `Cancelada`, `Mantenimiento`, `Agotado`, `Ausente`  |
+| Info        | Informational or active process | `Check-in`, `En Uso`, `Parcial`                     |
+| Default     | Neutral state                   | `Finalizada`, `Inactivo`                            |
 
 Do not rely only on color. Always show a clear text label.
 
@@ -178,15 +178,15 @@ Do not rely only on color. Always show a clear text label.
 
 Use a modern sans-serif font.
 
-| Element | Size | Weight |
-|---|---:|---:|
-| Page title | 24px to 28px | 600 |
-| Section title | 18px to 20px | 600 |
-| Card title | 16px | 600 |
-| Body | 14px | 400 |
-| Metadata | 12px | 400 or 500 |
-| Button | 14px | 500 |
-| Badge | 12px | 500 |
+| Element       |         Size |     Weight |
+| ------------- | -----------: | ---------: |
+| Page title    | 24px to 28px |        600 |
+| Section title | 18px to 20px |        600 |
+| Card title    |         16px |        600 |
+| Body          |         14px |        400 |
+| Metadata      |         12px | 400 or 500 |
+| Button        |         14px |        500 |
+| Badge         |         12px |        500 |
 
 Base font size: `14px`.
 
@@ -204,14 +204,14 @@ Allowed spacing values:
 
 Border radius:
 
-| Component | Radius |
-|---|---:|
-| Cards | 12px |
-| Inputs | 10px |
-| Buttons | 10px |
-| Modals | 16px |
-| Badges | 6px |
-| Drawers | 16px on visible edge when applicable |
+| Component |                               Radius |
+| --------- | -----------------------------------: |
+| Cards     |                                 12px |
+| Inputs    |                                 10px |
+| Buttons   |                                 10px |
+| Modals    |                                 16px |
+| Badges    |                                  6px |
+| Drawers   | 16px on visible edge when applicable |
 
 Use subtle shadows only when needed. Avoid heavy gradients and excessive decoration.
 
@@ -241,7 +241,7 @@ Rules:
 ### 8.2 Main Content Rule
 
 ```tsx
-className="flex-1 overflow-x-hidden overflow-y-auto bg-background"
+className = "flex-1 overflow-x-hidden overflow-y-auto bg-background";
 ```
 
 Main content padding:
@@ -274,13 +274,13 @@ Examples:
 
 ```tsx
 // 4 KPIs
-"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4";
 
 // 5 KPIs
-"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5";
 
 // 6 KPIs
-"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6";
 ```
 
 ### 9.2 Filters
@@ -299,11 +299,9 @@ Rules:
 Tables must be wrapped in a scroll container.
 
 ```tsx
-<div className="bg-card border border-border" style={{ maxWidth: '100%' }}>
-  <div style={{ overflowX: 'auto', width: '100%' }}>
-    <table style={{ width: '100%', minWidth: '1000px' }}>
-      {/* rows */}
-    </table>
+<div className="bg-card border border-border" style={{ maxWidth: "100%" }}>
+  <div style={{ overflowX: "auto", width: "100%" }}>
+    <table style={{ width: "100%", minWidth: "1000px" }}>{/* rows */}</table>
   </div>
 </div>
 ```
@@ -359,11 +357,11 @@ Rules:
 
 Standard modal sizes:
 
-| Size | Width |
-|---|---:|
-| Small | 500px to 600px |
-| Medium | 700px |
-| Large | 800px to 900px |
+| Size   |          Width |
+| ------ | -------------: |
+| Small  | 500px to 600px |
+| Medium |          700px |
+| Large  | 800px to 900px |
 
 Rules:
 
@@ -399,6 +397,7 @@ Sidebar labels in Spanish:
 - `Facturación`
 - `Inventario`
 - `Personal`
+- `Control de Asistencia`
 - `Áreas comunes`
 - `Reportes`
 - `Usuarios`
@@ -407,18 +406,19 @@ Sidebar labels in Spanish:
 
 ### 11.2 Role-Based Module Visibility
 
-| Module | Administrador | Recepcionista | Encargado Inventario | Gerencia |
-|---|---|---|---|---|
-| Dashboard | Yes | Yes | Yes | Yes |
-| Reservas | Yes | Yes | No | Read only |
-| Huéspedes | Yes | Yes | No | Read only |
-| Habitaciones | Yes | Yes | No | Read only |
-| Facturación | Yes | Limited | No | Read only |
-| Inventario | Yes | No | Yes | Read only |
-| Personal | Yes | No | No | Read only |
-| Áreas comunes | Yes | Yes | No | Read only |
-| Reportes | Yes | No | Limited | Yes |
-| Usuarios | Yes | No | No | No |
+| Module                | Administrador | Recepcionista | Encargado Inventario | Gerencia  |
+| --------------------- | ------------- | ------------- | -------------------- | --------- |
+| Dashboard             | Yes           | Limited       | Limited              | Yes       |
+| Reservas              | Yes           | Yes           | No                   | Read only |
+| Huéspedes             | Yes           | Yes           | No                   | Read only |
+| Habitaciones          | Yes           | Yes           | No                   | Read only |
+| Facturación           | Yes           | Limited       | No                   | Read only |
+| Inventario            | Yes           | No            | Yes                  | Read only |
+| Personal              | Yes           | No            | No                   | Read only |
+| Control de Asistencia | Yes           | No            | No                   | Read only |
+| Áreas comunes         | Yes           | Yes           | No                   | Read only |
+| Reportes              | Yes           | No            | No                   | Yes       |
+| Usuarios              | Yes           | No            | No                   | No        |
 
 UI must hide unauthorized modules, but backend authorization remains mandatory.
 
@@ -428,21 +428,23 @@ UI must hide unauthorized modules, but backend authorization remains mandatory.
 
 Use English route names when useful for code consistency, but keep Spanish labels in UI.
 
-| Route | UI label |
-|---|---|
-| `/` | Landing page |
-| `/login` | `Iniciar Sesión` |
-| `/dashboard` | `Dashboard` |
-| `/reservations` | `Reservas` |
-| `/guests` | `Huéspedes` |
-| `/rooms` | `Habitaciones` |
-| `/billing` | `Facturación` |
-| `/inventory` | `Inventario` |
-| `/staff` | `Personal` |
-| `/common-areas` | `Áreas comunes` |
-| `/reports` | `Reportes` |
-| `/users` | `Usuarios y Roles` |
-| `/profile` | `Mi Perfil` |
+| Route           | UI label                                     |
+| --------------- | -------------------------------------------- |
+| `/`             | Landing page                                 |
+| `/login`        | `Iniciar Sesión`                             |
+| `/dashboard`    | `Dashboard`                                  |
+| `/reservations` | `Reservas`                                   |
+| `/guests`       | `Huéspedes`                                  |
+| `/rooms`        | `Habitaciones`                               |
+| `/billing`      | `Facturación`                                |
+| `/inventory`    | `Inventario`                                 |
+| `/staff`        | `Personal`                                   |
+| `/attendance`   | `Control de Asistencia`                      |
+| `/common-areas` | `Áreas comunes`                              |
+| `/reports`      | `Reportes`                                   |
+| `/users`        | `Usuarios y Roles`                           |
+| `/users/roles`  | `Usuarios y Roles` _(sub-vista de Usuarios)_ |
+| `/profile`      | `Mi Perfil`                                  |
 
 ---
 
@@ -903,17 +905,17 @@ Use Spanish messages:
 
 ### 14.2 Common Validations
 
-| Context | Validation |
-|---|---|
-| Dates | end date must be after start date |
-| Reservations | assigned room is required before check-in |
-| Guests | duplicate document is not allowed |
-| Rooms | duplicate room number is not allowed |
-| Billing | payment amount cannot exceed due balance |
-| Inventory | output quantity cannot exceed available stock |
-| Staff | check-out requires previous check-in |
-| Common areas | time conflict is not allowed |
-| Users | duplicate email is not allowed |
+| Context      | Validation                                    |
+| ------------ | --------------------------------------------- |
+| Dates        | end date must be after start date             |
+| Reservations | assigned room is required before check-in     |
+| Guests       | duplicate document is not allowed             |
+| Rooms        | duplicate room number is not allowed          |
+| Billing      | payment amount cannot exceed due balance      |
+| Inventory    | output quantity cannot exceed available stock |
+| Staff        | check-out requires previous check-in          |
+| Common areas | time conflict is not allowed                  |
+| Users        | duplicate email is not allowed                |
 
 ### 14.3 Feedback States
 

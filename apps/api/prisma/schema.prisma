@@ -437,6 +437,7 @@ model CommonAreaReservation {
   reservationDate DateTime
   startTime       String
   endTime         String
+  attendeesCount  Int        @default(1)
   status          String
   observation     String?
   commonArea      CommonArea @relation(fields: [commonAreaId], references: [id])
