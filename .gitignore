@@ -20,6 +20,10 @@ coverage/
 .env.local
 .env.*.local
 
+# Project agent notes (root only — copies live in docs/)
+/AGENTS.md
+/CLAUDE.md
+
 # Foreign package managers - el proyecto usa solo Bun (CLAUDE.md section 3.1/15)
 package-lock.json
 yarn.lock
