@@ -13,9 +13,14 @@
     "build:web": "bun --filter @sunstay/web build",
     "build:api": "bun --filter @sunstay/api build",
     "lint": "bun --filter '*' lint",
-    "format": "bunx prettier --write \"**/*.{ts,tsx,json,md}\""
+    "format": "bunx prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "prisma:generate": "bun --filter @sunstay/api prisma:generate",
+    "prisma:migrate": "bun --filter @sunstay/api prisma:migrate",
+    "prisma:studio": "bun --filter @sunstay/api prisma:studio",
+    "prisma:seed": "bun --filter @sunstay/api prisma:seed",
+    "db:setup": "bun --filter @sunstay/api db:setup"
   },
   "engines": {
-    "node": ">=18"
+    "node": "24.15.0"
   }
 }

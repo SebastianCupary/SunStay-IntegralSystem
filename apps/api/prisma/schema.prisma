@@ -1,1 +1,478 @@
-// Prisma schema will be defined here
+// SunStay - Prisma schema
+// Hotel management system for Hotel Tropical Sun.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Hotel {
+  id             String          @id @default(uuid())
+  name           String
+  address        String
+  phone          String?
+  email          String?
+  rooms          Room[]
+  reservations   Reservation[]
+  staff          Staff[]
+  inventoryAreas InventoryArea[]
+  commonAreas    CommonArea[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model RoomType {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  capacity    Int
+  baseRate    Decimal  @db.Decimal(12, 2)
+  rooms       Room[]
+}
+
+model RoomStatus {
+  id          String              @id @default(uuid())
+  name        String              @unique
+  description String?
+  rooms       Room[]
+  histories   RoomStatusHistory[]
+}
+
+model Room {
+  id             String               @id @default(uuid())
+  hotelId        String
+  roomTypeId     String
+  roomStatusId   String
+  number         String
+  floor          String?
+  observation    String?
+  hotel          Hotel                @relation(fields: [hotelId], references: [id])
+  roomType       RoomType             @relation(fields: [roomTypeId], references: [id])
+  roomStatus     RoomStatus           @relation(fields: [roomStatusId], references: [id])
+  histories      RoomStatusHistory[]
+  reservationDetails ReservationDetail[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  deletedAt      DateTime?
+}
+
+model RoomStatusHistory {
+  id              String     @id @default(uuid())
+  roomId          String
+  roomStatusId    String
+  startDateTime   DateTime
+  endDateTime     DateTime?
+  observation     String?
+  room            Room       @relation(fields: [roomId], references: [id])
+  roomStatus      RoomStatus @relation(fields: [roomStatusId], references: [id])
+}
+
+model ReservationHolder {
+  id               String        @id @default(uuid())
+  firstName        String
+  lastName         String
+  identityDocument String?
+  phone            String?
+  email            String?
+  reservations     Reservation[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model Guest {
+  id               String                  @id @default(uuid())
+  firstName        String
+  lastName         String
+  identityDocument String?
+  phone            String?
+  email            String?
+  nationality      String?
+  birthYear        Int?
+  sex              String?
+  profession       String?
+  originCity       String?
+  reservationGuests ReservationGuest[]
+  commonAreaReservations CommonAreaReservation[]
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  deletedAt        DateTime?
+}
+
+model ReservationStatus {
+  id           String                     @id @default(uuid())
+  name         String                     @unique
+  description  String?
+  reservations Reservation[]
+  histories    ReservationStatusHistory[]
+}
+
+model Reservation {
+  id                  String                     @id @default(uuid())
+  hotelId             String
+  reservationHolderId String
+  reservationStatusId String
+  reservationDate     DateTime                   @default(now())
+  checkInDate         DateTime
+  checkOutDate        DateTime
+  guestQuantity       Int
+  reservationChannel  String?
+  estimatedAmount     Decimal?                   @db.Decimal(12, 2)
+  observation         String?
+  hotel               Hotel                      @relation(fields: [hotelId], references: [id])
+  reservationHolder   ReservationHolder          @relation(fields: [reservationHolderId], references: [id])
+  reservationStatus   ReservationStatus          @relation(fields: [reservationStatusId], references: [id])
+  guests              ReservationGuest[]
+  details             ReservationDetail[]
+  histories           ReservationStatusHistory[]
+  stay                Stay?
+  invoice             Invoice?
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+  deletedAt           DateTime?
+}
+
+model ReservationGuest {
+  id            String      @id @default(uuid())
+  reservationId String
+  guestId       String
+  isMainGuest   Boolean     @default(false)
+  observation   String?
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  guest         Guest       @relation(fields: [guestId], references: [id])
+
+  @@unique([reservationId, guestId])
+}
+
+model ReservationDetail {
+  id             String      @id @default(uuid())
+  reservationId  String
+  roomId         String
+  appliedRate    Decimal     @db.Decimal(12, 2)
+  nightsQuantity Int
+  subtotal       Decimal     @db.Decimal(12, 2)
+  reservation    Reservation @relation(fields: [reservationId], references: [id])
+  room           Room        @relation(fields: [roomId], references: [id])
+}
+
+model ReservationStatusHistory {
+  id                  String            @id @default(uuid())
+  reservationId        String
+  reservationStatusId  String
+  userId              String
+  changeDateTime      DateTime          @default(now())
+  observation          String?
+  reservation          Reservation      @relation(fields: [reservationId], references: [id])
+  reservationStatus    ReservationStatus @relation(fields: [reservationStatusId], references: [id])
+  user                 User             @relation(fields: [userId], references: [id])
+}
+
+model Stay {
+  id               String      @id @default(uuid())
+  reservationId    String      @unique
+  checkInDateTime  DateTime?
+  checkOutDateTime DateTime?
+  stayStatus       String
+  observation      String?
+  reservation      Reservation @relation(fields: [reservationId], references: [id])
+}
+
+model PaymentStatus {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  invoices    Invoice[]
+}
+
+model PaymentMethod {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  invoices    Invoice[]
+}
+
+model Invoice {
+  id              String          @id @default(uuid())
+  reservationId   String          @unique
+  paymentStatusId String
+  paymentMethodId String
+  issueDate       DateTime        @default(now())
+  total           Decimal         @db.Decimal(12, 2)
+  reservation     Reservation     @relation(fields: [reservationId], references: [id])
+  paymentStatus   PaymentStatus   @relation(fields: [paymentStatusId], references: [id])
+  paymentMethod   PaymentMethod   @relation(fields: [paymentMethodId], references: [id])
+  details         InvoiceDetail[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+}
+
+model InvoiceDetail {
+  id        String  @id @default(uuid())
+  invoiceId String
+  concept   String
+  quantity  Int
+  unitPrice Decimal @db.Decimal(12, 2)
+  subtotal  Decimal @db.Decimal(12, 2)
+  invoice   Invoice @relation(fields: [invoiceId], references: [id])
+}
+
+model Position {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+  staff       Staff[]
+}
+
+model Shift {
+  id          String  @id @default(uuid())
+  name        String
+  startTime   String
+  endTime     String
+  description String?
+  staff       Staff[]
+}
+
+model Staff {
+  id                  String               @id @default(uuid())
+  hotelId             String
+  positionId          String
+  shiftId             String
+  firstName           String
+  lastName            String
+  phone               String?
+  email               String?
+  status              String
+  hotel               Hotel                @relation(fields: [hotelId], references: [id])
+  position            Position             @relation(fields: [positionId], references: [id])
+  shift               Shift                @relation(fields: [shiftId], references: [id])
+  attendances         StaffAttendance[]
+  accessControls      StaffAccessControl[]
+  inventoryMovements  InventoryMovement[]
+  user                User?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  deletedAt           DateTime?
+}
+
+model StaffAttendance {
+  id               String   @id @default(uuid())
+  staffId          String
+  date             DateTime
+  entryTime        String?
+  exitTime         String?
+  attendanceStatus String
+  observation      String?
+  staff            Staff    @relation(fields: [staffId], references: [id])
+}
+
+model StaffAccessControl {
+  id            String   @id @default(uuid())
+  staffId       String
+  dateTime      DateTime @default(now())
+  movementType  String
+  recordSource  String
+  observation   String?
+  staff         Staff    @relation(fields: [staffId], references: [id])
+}
+
+model Role {
+  id           String                 @id @default(uuid())
+  name         String                 @unique
+  description  String?
+  isSystemRole Boolean                @default(false)
+  users        User[]
+  permissions  RoleModulePermission[]
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+}
+
+model User {
+  id           String                     @id @default(uuid())
+  staffId      String?                    @unique
+  roleId       String
+  fullName     String
+  email        String                     @unique
+  phone        String?
+  passwordHash String
+  status       String                     @default("Active")
+  lastAccessAt DateTime?
+  staff        Staff?                     @relation(fields: [staffId], references: [id])
+  role         Role                       @relation(fields: [roleId], references: [id])
+  reservationStatusHistories ReservationStatusHistory[]
+  reports      Report[]
+  statusHistories UserStatusHistory[]     @relation("UserStatusHistory_user")
+  statusChangesMade UserStatusHistory[]   @relation("UserStatusHistory_changedBy")
+  passwordResetTokens PasswordResetToken[]
+  createdAt    DateTime                   @default(now())
+  updatedAt    DateTime                   @updatedAt
+  deletedAt    DateTime?
+}
+
+model SystemModule {
+  id          String                 @id @default(uuid())
+  name        String
+  code        String                 @unique
+  route       String
+  description String?
+  isActive    Boolean                @default(true)
+  permissions RoleModulePermission[]
+}
+
+model RoleModulePermission {
+  id             String       @id @default(uuid())
+  roleId         String
+  systemModuleId String
+  canView        Boolean      @default(false)
+  canCreate      Boolean      @default(false)
+  canUpdate      Boolean      @default(false)
+  canDelete      Boolean      @default(false)
+  canExport      Boolean      @default(false)
+  canManage      Boolean      @default(false)
+  role           Role         @relation(fields: [roleId], references: [id])
+  systemModule   SystemModule @relation(fields: [systemModuleId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([roleId, systemModuleId])
+}
+
+model UserStatusHistory {
+  id              String   @id @default(uuid())
+  userId          String
+  previousStatus  String
+  newStatus       String
+  changedByUserId String
+  changeDateTime  DateTime @default(now())
+  reason          String?
+  user            User     @relation("UserStatusHistory_user", fields: [userId], references: [id])
+  changedByUser   User     @relation("UserStatusHistory_changedBy", fields: [changedByUserId], references: [id])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+model InventoryArea {
+  id          String      @id @default(uuid())
+  hotelId     String
+  name        String
+  description String?
+  hotel       Hotel       @relation(fields: [hotelId], references: [id])
+  inventories Inventory[]
+}
+
+model ProductCategory {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  products    Product[]
+}
+
+model Product {
+  id                String          @id @default(uuid())
+  productCategoryId String
+  name              String
+  description       String?
+  unitOfMeasure     String
+  minimumStock      Decimal         @db.Decimal(12, 3)
+  productCategory   ProductCategory @relation(fields: [productCategoryId], references: [id])
+  inventories       Inventory[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
+}
+
+model Inventory {
+  id              String              @id @default(uuid())
+  inventoryAreaId String
+  productId       String
+  currentStock    Decimal             @db.Decimal(12, 3)
+  updatedAt       DateTime            @updatedAt
+  inventoryArea   InventoryArea       @relation(fields: [inventoryAreaId], references: [id])
+  product         Product             @relation(fields: [productId], references: [id])
+  movements       InventoryMovement[]
+
+  @@unique([inventoryAreaId, productId])
+}
+
+model InventoryMovement {
+  id           String    @id @default(uuid())
+  inventoryId  String
+  staffId      String
+  movementDate DateTime  @default(now())
+  movementType String
+  quantity     Decimal   @db.Decimal(12, 3)
+  reason       String?
+  inventory    Inventory @relation(fields: [inventoryId], references: [id])
+  staff        Staff     @relation(fields: [staffId], references: [id])
+  createdAt    DateTime  @default(now())
+}
+
+model CommonArea {
+  id           String                  @id @default(uuid())
+  hotelId      String
+  name         String
+  description  String?
+  capacity     Int
+  status       String
+  hotel        Hotel                   @relation(fields: [hotelId], references: [id])
+  reservations CommonAreaReservation[]
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+}
+
+model CommonAreaReservation {
+  id              String     @id @default(uuid())
+  commonAreaId    String
+  guestId         String
+  reservationDate DateTime
+  startTime       String
+  endTime         String
+  attendeesCount  Int        @default(1)
+  status          String
+  observation     String?
+  commonArea      CommonArea @relation(fields: [commonAreaId], references: [id])
+  guest           Guest      @relation(fields: [guestId], references: [id])
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+}
+
+model ReportType {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  reports     Report[]
+}
+
+model Report {
+  id           String         @id @default(uuid())
+  reportTypeId String
+  userId       String
+  generatedAt  DateTime       @default(now())
+  startDate    DateTime?
+  endDate      DateTime?
+  format       String
+  criteria     String?
+  observation  String?
+  reportType   ReportType     @relation(fields: [reportTypeId], references: [id])
+  user         User           @relation(fields: [userId], references: [id])
+  details      ReportDetail[]
+}
+
+model ReportDetail {
+  id              String @id @default(uuid())
+  reportId        String
+  itemDescription String
+  referenceValue  String
+  report          Report @relation(fields: [reportId], references: [id])
+}

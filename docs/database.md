@@ -41,15 +41,15 @@ The selected ORM is **Prisma ORM**, used from the **NestJS** backend with **Type
 
 ### Technology decisions
 
-| Component | Selected Technology |
-|---|---|
-| Database engine | PostgreSQL |
-| ORM | Prisma ORM |
-| Backend integration | NestJS + TypeScript |
-| Runtime and package manager | Bun |
-| API style | REST |
-| Local development | Docker Compose with Bun-compatible services |
-| Cloud database target | Azure Database for PostgreSQL |
+| Component                   | Selected Technology                         |
+| --------------------------- | ------------------------------------------- |
+| Database engine             | PostgreSQL                                  |
+| ORM                         | Prisma ORM                                  |
+| Backend integration         | NestJS + TypeScript                         |
+| Runtime and package manager | Bun                                         |
+| API style                   | REST                                        |
+| Local development           | Docker Compose with Bun-compatible services |
+| Cloud database target       | Azure Database for PostgreSQL               |
 
 ---
 
@@ -142,7 +142,9 @@ updatedAt
 deletedAt
 ```
 
-Use `deletedAt` only if soft deletion is required.
+**Decision (resolved):** SunStay adopts **soft deletion** on operational tables. Operational entities (Reservation, Guest, Room, Invoice, Staff, Product, CommonAreaReservation, User, etc.) include a nullable `deletedAt` field. Pure catalog tables (statuses, methods, roles, modules) do not require `deletedAt`.
+
+**Decision (resolved):** primary keys use **UUID** (`@default(uuid())`) across all tables.
 
 ---
 
@@ -167,81 +169,81 @@ The database is organized into the following business modules:
 
 ### 6.1 Hotel and rooms
 
-| Entity | Purpose |
-|---|---|
-| Hotel | Stores general hotel information. |
-| RoomType | Defines room categories, capacity, and base rate. |
-| RoomStatus | Catalog of possible room states. |
-| Room | Stores hotel room information. |
-| RoomStatusHistory | Tracks room status changes over time. |
+| Entity            | Purpose                                           |
+| ----------------- | ------------------------------------------------- |
+| Hotel             | Stores general hotel information.                 |
+| RoomType          | Defines room categories, capacity, and base rate. |
+| RoomStatus        | Catalog of possible room states.                  |
+| Room              | Stores hotel room information.                    |
+| RoomStatusHistory | Tracks room status changes over time.             |
 
 ### 6.2 Reservations and guests
 
-| Entity | Purpose |
-|---|---|
-| ReservationHolder | Stores the responsible person who creates the reservation. |
-| Guest | Stores guest information. |
-| ReservationStatus | Catalog of reservation states. |
-| Reservation | Stores reservation header information. |
-| ReservationGuest | Links multiple guests to one reservation. |
-| ReservationDetail | Links reservations to one or more rooms. |
-| ReservationStatusHistory | Tracks reservation status changes. |
+| Entity                   | Purpose                                                    |
+| ------------------------ | ---------------------------------------------------------- |
+| ReservationHolder        | Stores the responsible person who creates the reservation. |
+| Guest                    | Stores guest information.                                  |
+| ReservationStatus        | Catalog of reservation states.                             |
+| Reservation              | Stores reservation header information.                     |
+| ReservationGuest         | Links multiple guests to one reservation.                  |
+| ReservationDetail        | Links reservations to one or more rooms.                   |
+| ReservationStatusHistory | Tracks reservation status changes.                         |
 
 ### 6.3 Stays
 
-| Entity | Purpose |
-|---|---|
-| Stay | Stores check-in and check-out information related to a reservation. |
+| Entity | Purpose                                                             |
+| ------ | ------------------------------------------------------------------- |
+| Stay   | Stores check-in and check-out information related to a reservation. |
 
 ### 6.4 Billing and payments
 
-| Entity | Purpose |
-|---|---|
+| Entity        | Purpose                            |
+| ------------- | ---------------------------------- |
 | PaymentStatus | Catalog of invoice payment states. |
-| PaymentMethod | Catalog of payment methods. |
-| Invoice | Stores invoice header information. |
-| InvoiceDetail | Stores invoice line items. |
+| PaymentMethod | Catalog of payment methods.        |
+| Invoice       | Stores invoice header information. |
+| InvoiceDetail | Stores invoice line items.         |
 
 ### 6.5 Inventory by area
 
-| Entity | Purpose |
-|---|---|
-| InventoryArea | Defines hotel areas where inventory is controlled. |
-| ProductCategory | Catalog of product categories. |
-| Product | Stores products and supplies. |
-| Inventory | Stores current stock by area and product. |
-| InventoryMovement | Tracks stock entries and exits. |
+| Entity            | Purpose                                            |
+| ----------------- | -------------------------------------------------- |
+| InventoryArea     | Defines hotel areas where inventory is controlled. |
+| ProductCategory   | Catalog of product categories.                     |
+| Product           | Stores products and supplies.                      |
+| Inventory         | Stores current stock by area and product.          |
+| InventoryMovement | Tracks stock entries and exits.                    |
 
 ### 6.6 Staff and attendance
 
-| Entity | Purpose |
-|---|---|
-| Position | Catalog of staff positions. |
-| Shift | Defines staff work shifts. |
-| Staff | Stores staff member information. |
-| StaffAttendance | Tracks daily attendance. |
+| Entity             | Purpose                                           |
+| ------------------ | ------------------------------------------------- |
+| Position           | Catalog of staff positions.                       |
+| Shift              | Defines staff work shifts.                        |
+| Staff              | Stores staff member information.                  |
+| StaffAttendance    | Tracks daily attendance.                          |
 | StaffAccessControl | Tracks detailed check-in and check-out movements. |
 
 ### 6.7 Users and roles
 
-| Entity | Purpose |
-|---|---|
-| Role | Catalog of system roles. |
-| User | Stores internal system users. |
+| Entity | Purpose                       |
+| ------ | ----------------------------- |
+| Role   | Catalog of system roles.      |
+| User   | Stores internal system users. |
 
 ### 6.8 Common areas
 
-| Entity | Purpose |
-|---|---|
-| CommonArea | Stores hotel common areas such as pool and meeting room. |
-| CommonAreaReservation | Stores reservations for common areas. |
+| Entity                | Purpose                                                  |
+| --------------------- | -------------------------------------------------------- |
+| CommonArea            | Stores hotel common areas such as pool and meeting room. |
+| CommonAreaReservation | Stores reservations for common areas.                    |
 
 ### 6.9 Reports
 
-| Entity | Purpose |
-|---|---|
-| ReportType | Catalog of report types. |
-| Report | Stores report generation metadata. |
+| Entity       | Purpose                                                     |
+| ------------ | ----------------------------------------------------------- |
+| ReportType   | Catalog of report types.                                    |
+| Report       | Stores report generation metadata.                          |
 | ReportDetail | Stores report detail or summarized result data if required. |
 
 ---
@@ -252,14 +254,14 @@ The database is organized into the following business modules:
 
 Stores general information about Hotel Tropical Sun.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Hotel name. |
-| address | String | Hotel address. |
-| phone | String | Contact phone. |
-| email | String | Contact email. |
-| createdAt | DateTime | Creation date. |
+| Field     | Type     | Description       |
+| --------- | -------- | ----------------- |
+| id        | UUID     | Primary key.      |
+| name      | String   | Hotel name.       |
+| address   | String   | Hotel address.    |
+| phone     | String   | Contact phone.    |
+| email     | String   | Contact email.    |
+| createdAt | DateTime | Creation date.    |
 | updatedAt | DateTime | Last update date. |
 
 Relationships:
@@ -276,15 +278,15 @@ Relationships:
 
 Defines the type, capacity, and base rate of a room.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Room type name. |
-| description | String | Room type description. |
-| capacity | Int | Maximum guest capacity. |
-| baseRate | Decimal | Base price per night. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field       | Type     | Description             |
+| ----------- | -------- | ----------------------- |
+| id          | UUID     | Primary key.            |
+| name        | String   | Room type name.         |
+| description | String   | Room type description.  |
+| capacity    | Int      | Maximum guest capacity. |
+| baseRate    | Decimal  | Base price per night.   |
+| createdAt   | DateTime | Creation date.          |
+| updatedAt   | DateTime | Last update date.       |
 
 Relationships:
 
@@ -304,10 +306,10 @@ Recommended values:
 - Cleaning
 - Maintenance
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Status name. |
+| Field       | Type   | Description         |
+| ----------- | ------ | ------------------- |
+| id          | UUID   | Primary key.        |
+| name        | String | Status name.        |
 | description | String | Status description. |
 
 Relationships:
@@ -321,17 +323,17 @@ Relationships:
 
 Stores room data.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| hotelId | FK | Related hotel. |
-| roomTypeId | FK | Related room type. |
-| roomStatusId | FK | Current room status. |
-| number | String | Room number. |
-| floor | String / Int | Floor where the room is located. |
-| observation | String | Optional room notes. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field        | Type         | Description                      |
+| ------------ | ------------ | -------------------------------- |
+| id           | UUID         | Primary key.                     |
+| hotelId      | FK           | Related hotel.                   |
+| roomTypeId   | FK           | Related room type.               |
+| roomStatusId | FK           | Current room status.             |
+| number       | String       | Room number.                     |
+| floor        | String / Int | Floor where the room is located. |
+| observation  | String       | Optional room notes.             |
+| createdAt    | DateTime     | Creation date.                   |
+| updatedAt    | DateTime     | Last update date.                |
 
 Relationships:
 
@@ -347,14 +349,14 @@ Relationships:
 
 Tracks changes in room state over time.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| roomId | FK | Related room. |
-| roomStatusId | FK | Assigned status. |
+| Field         | Type     | Description                 |
+| ------------- | -------- | --------------------------- |
+| id            | UUID     | Primary key.                |
+| roomId        | FK       | Related room.               |
+| roomStatusId  | FK       | Assigned status.            |
 | startDateTime | DateTime | Start of the status period. |
-| endDateTime | DateTime | End of the status period. |
-| observation | String | Optional notes. |
+| endDateTime   | DateTime | End of the status period.   |
+| observation   | String   | Optional notes.             |
 
 Relationships:
 
@@ -369,16 +371,16 @@ Stores the responsible person who creates or owns the reservation.
 
 This entity is separated from Guest because the person responsible for a reservation may not always be the only guest staying in the hotel.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| firstName | String | Holder first name. |
-| lastName | String | Holder last name. |
-| identityDocument | String | Document number. |
-| phone | String | Contact phone. |
-| email | String | Contact email. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field            | Type     | Description        |
+| ---------------- | -------- | ------------------ |
+| id               | UUID     | Primary key.       |
+| firstName        | String   | Holder first name. |
+| lastName         | String   | Holder last name.  |
+| identityDocument | String   | Document number.   |
+| phone            | String   | Contact phone.     |
+| email            | String   | Contact email.     |
+| createdAt        | DateTime | Creation date.     |
+| updatedAt        | DateTime | Last update date.  |
 
 Relationships:
 
@@ -390,22 +392,31 @@ Relationships:
 
 Stores guest information.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| firstName | String | Guest first name. |
-| lastName | String | Guest last name. |
-| identityDocument | String | Guest identity document. |
-| phone | String | Contact phone. |
-| email | String | Contact email. |
-| nationality | String | Guest nationality. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field            | Type     | Description                      |
+| ---------------- | -------- | -------------------------------- |
+| id               | UUID     | Primary key.                     |
+| firstName        | String   | Guest first name.                |
+| lastName         | String   | Guest last name.                 |
+| identityDocument | String   | Guest identity document.         |
+| phone            | String   | Contact phone.                   |
+| email            | String   | Contact email.                   |
+| nationality      | String   | Guest nationality.               |
+| birthYear        | Int      | Year of birth. Optional.         |
+| sex              | String   | Guest sex. Optional.             |
+| profession       | String   | Guest profession. Optional.      |
+| originCity       | String   | City of origin. Optional.        |
+| createdAt        | DateTime | Creation date.                   |
+| updatedAt        | DateTime | Last update date.                |
+| deletedAt        | DateTime | Soft-delete timestamp. Nullable. |
 
 Relationships:
 
 - One guest can be linked to many reservations through ReservationGuest.
 - One guest can request many common area reservations.
+
+> Privacy note: `sex`, `profession`, and other personal guest attributes must be handled according to the data-protection rules in section 14.
+
+> Guest status taxonomy (UX-only, derived): the UI displays guest states — `Hospedado` (currently checked-in), `Anterior` (past guest), `Frecuente` (repeat guest), `Nuevo` (first reservation) — that are computed from reservation/stay history and are **not stored as a field** in this model, consistent with how attendance states are derived (see §11.1).
 
 ---
 
@@ -421,10 +432,10 @@ Recommended values:
 - Checked-in
 - Checked-out
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Status name. |
+| Field       | Type   | Description         |
+| ----------- | ------ | ------------------- |
+| id          | UUID   | Primary key.        |
+| name        | String | Status name.        |
 | description | String | Status description. |
 
 Relationships:
@@ -438,21 +449,21 @@ Relationships:
 
 Stores reservation header information.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| hotelId | FK | Related hotel. |
-| reservationHolderId | FK | Responsible reservation holder. |
-| reservationStatusId | FK | Current reservation status. |
-| reservationDate | Date | Date when reservation was created. |
-| checkInDate | Date | Planned check-in date. |
-| checkOutDate | Date | Planned check-out date. |
-| guestQuantity | Int | Total number of guests. |
-| reservationChannel | String | Channel used to create the reservation. |
-| estimatedAmount | Decimal | Estimated reservation amount. |
-| observation | String | Optional reservation notes. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field               | Type     | Description                             |
+| ------------------- | -------- | --------------------------------------- |
+| id                  | UUID     | Primary key.                            |
+| hotelId             | FK       | Related hotel.                          |
+| reservationHolderId | FK       | Responsible reservation holder.         |
+| reservationStatusId | FK       | Current reservation status.             |
+| reservationDate     | Date     | Date when reservation was created.      |
+| checkInDate         | Date     | Planned check-in date.                  |
+| checkOutDate        | Date     | Planned check-out date.                 |
+| guestQuantity       | Int      | Total number of guests.                 |
+| reservationChannel  | String   | Channel used to create the reservation. |
+| estimatedAmount     | Decimal  | Estimated reservation amount.           |
+| observation         | String   | Optional reservation notes.             |
+| createdAt           | DateTime | Creation date.                          |
+| updatedAt           | DateTime | Last update date.                       |
 
 Relationships:
 
@@ -468,7 +479,7 @@ Relationships:
 Business rules:
 
 - A reservation must have one responsible holder.
-- A reservation can include one or more guests.
+- A reservation must include at least one guest.
 - A reservation can include one or more rooms.
 - Guest quantity must not exceed the total capacity of assigned rooms.
 
@@ -478,13 +489,13 @@ Business rules:
 
 Intermediate entity that links reservations and guests.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| reservationId | FK | Related reservation. |
-| guestId | FK | Related guest. |
-| isMainGuest | Boolean | Indicates whether the guest is the main guest. |
-| observation | String | Optional notes. |
+| Field         | Type    | Description                                    |
+| ------------- | ------- | ---------------------------------------------- |
+| id            | UUID    | Primary key.                                   |
+| reservationId | FK      | Related reservation.                           |
+| guestId       | FK      | Related guest.                                 |
+| isMainGuest   | Boolean | Indicates whether the guest is the main guest. |
+| observation   | String  | Optional notes.                                |
 
 Relationships:
 
@@ -497,14 +508,14 @@ Relationships:
 
 Links reservations with assigned rooms.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| reservationId | FK | Related reservation. |
-| roomId | FK | Assigned room. |
-| appliedRate | Decimal | Applied nightly rate. |
-| nightsQuantity | Int | Number of nights. |
-| subtotal | Decimal | Detail subtotal. |
+| Field          | Type    | Description           |
+| -------------- | ------- | --------------------- |
+| id             | UUID    | Primary key.          |
+| reservationId  | FK      | Related reservation.  |
+| roomId         | FK      | Assigned room.        |
+| appliedRate    | Decimal | Applied nightly rate. |
+| nightsQuantity | Int     | Number of nights.     |
+| subtotal       | Decimal | Detail subtotal.      |
 
 Relationships:
 
@@ -517,14 +528,14 @@ Relationships:
 
 Tracks reservation status changes.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| reservationId | FK | Related reservation. |
-| reservationStatusId | FK | New status. |
-| userId | FK | User who made the change. |
-| changeDateTime | DateTime | Date and time of the change. |
-| observation | String | Optional notes. |
+| Field               | Type     | Description                  |
+| ------------------- | -------- | ---------------------------- |
+| id                  | UUID     | Primary key.                 |
+| reservationId       | FK       | Related reservation.         |
+| reservationStatusId | FK       | New status.                  |
+| userId              | FK       | User who made the change.    |
+| changeDateTime      | DateTime | Date and time of the change. |
+| observation         | String   | Optional notes.              |
 
 Relationships:
 
@@ -538,14 +549,14 @@ Relationships:
 
 Stores check-in and check-out information.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| reservationId | FK | Related reservation. |
-| checkInDateTime | DateTime | Actual check-in date and time. |
+| Field            | Type     | Description                     |
+| ---------------- | -------- | ------------------------------- |
+| id               | UUID     | Primary key.                    |
+| reservationId    | FK       | Related reservation.            |
+| checkInDateTime  | DateTime | Actual check-in date and time.  |
 | checkOutDateTime | DateTime | Actual check-out date and time. |
-| stayStatus | String | Current stay status. |
-| observation | String | Optional stay notes. |
+| stayStatus       | String   | Current stay status.            |
+| observation      | String   | Optional stay notes.            |
 
 Relationships:
 
@@ -564,10 +575,10 @@ Recommended values:
 - Paid
 - Overdue
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Status name. |
+| Field       | Type   | Description         |
+| ----------- | ------ | ------------------- |
+| id          | UUID   | Primary key.        |
+| name        | String | Status name.        |
 | description | String | Status description. |
 
 Relationships:
@@ -587,10 +598,10 @@ Recommended values:
 - Card
 - QR Payment
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Payment method name. |
+| Field       | Type   | Description                 |
+| ----------- | ------ | --------------------------- |
+| id          | UUID   | Primary key.                |
+| name        | String | Payment method name.        |
 | description | String | Payment method description. |
 
 Relationships:
@@ -603,16 +614,16 @@ Relationships:
 
 Stores invoice header data.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| reservationId | FK | Related reservation. |
-| paymentStatusId | FK | Current payment status. |
-| paymentMethodId | FK | Payment method. |
-| issueDate | Date | Invoice issue date. |
-| total | Decimal | Invoice total amount. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field           | Type     | Description             |
+| --------------- | -------- | ----------------------- |
+| id              | UUID     | Primary key.            |
+| reservationId   | FK       | Related reservation.    |
+| paymentStatusId | FK       | Current payment status. |
+| paymentMethodId | FK       | Payment method.         |
+| issueDate       | Date     | Invoice issue date.     |
+| total           | Decimal  | Invoice total amount.   |
+| createdAt       | DateTime | Creation date.          |
+| updatedAt       | DateTime | Last update date.       |
 
 Relationships:
 
@@ -627,14 +638,14 @@ Relationships:
 
 Stores invoice line items.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| invoiceId | FK | Related invoice. |
-| concept | String | Billing concept. |
-| quantity | Int | Item quantity. |
-| unitPrice | Decimal | Unit price. |
-| subtotal | Decimal | Detail subtotal. |
+| Field     | Type    | Description      |
+| --------- | ------- | ---------------- |
+| id        | UUID    | Primary key.     |
+| invoiceId | FK      | Related invoice. |
+| concept   | String  | Billing concept. |
+| quantity  | Int     | Item quantity.   |
+| unitPrice | Decimal | Unit price.      |
+| subtotal  | Decimal | Detail subtotal. |
 
 Relationships:
 
@@ -655,10 +666,10 @@ Recommended values:
 - Manager
 - Inventory Manager
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Position name. |
+| Field       | Type   | Description           |
+| ----------- | ------ | --------------------- |
+| id          | UUID   | Primary key.          |
+| name        | String | Position name.        |
 | description | String | Position description. |
 
 Relationships:
@@ -671,12 +682,12 @@ Relationships:
 
 Defines work shifts.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Shift name. |
-| startTime | Time | Shift start time. |
-| endTime | Time | Shift end time. |
+| Field       | Type   | Description        |
+| ----------- | ------ | ------------------ |
+| id          | UUID   | Primary key.       |
+| name        | String | Shift name.        |
+| startTime   | Time   | Shift start time.  |
+| endTime     | Time   | Shift end time.    |
 | description | String | Shift description. |
 
 Relationships:
@@ -689,19 +700,19 @@ Relationships:
 
 Stores staff member information.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| hotelId | FK | Related hotel. |
-| positionId | FK | Staff position. |
-| shiftId | FK | Assigned shift. |
-| firstName | String | Staff first name. |
-| lastName | String | Staff last name. |
-| phone | String | Contact phone. |
-| email | String | Contact email. |
-| status | String | Staff status. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field      | Type     | Description       |
+| ---------- | -------- | ----------------- |
+| id         | UUID     | Primary key.      |
+| hotelId    | FK       | Related hotel.    |
+| positionId | FK       | Staff position.   |
+| shiftId    | FK       | Assigned shift.   |
+| firstName  | String   | Staff first name. |
+| lastName   | String   | Staff last name.  |
+| phone      | String   | Contact phone.    |
+| email      | String   | Contact email.    |
+| status     | String   | Staff status.     |
+| createdAt  | DateTime | Creation date.    |
+| updatedAt  | DateTime | Last update date. |
 
 Relationships:
 
@@ -719,15 +730,15 @@ Relationships:
 
 Tracks daily staff attendance.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| staffId | FK | Related staff member. |
-| date | Date | Attendance date. |
-| entryTime | Time | Daily entry time. |
-| exitTime | Time | Daily exit time. |
-| attendanceStatus | String | Attendance state. |
-| observation | String | Optional notes. |
+| Field            | Type   | Description           |
+| ---------------- | ------ | --------------------- |
+| id               | UUID   | Primary key.          |
+| staffId          | FK     | Related staff member. |
+| date             | Date   | Attendance date.      |
+| entryTime        | Time   | Daily entry time.     |
+| exitTime         | Time   | Daily exit time.      |
+| attendanceStatus | String | Attendance state.     |
+| observation      | String | Optional notes.       |
 
 Recommended attendance states:
 
@@ -747,14 +758,14 @@ Relationships:
 
 Tracks detailed staff access movements.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| staffId | FK | Related staff member. |
-| dateTime | DateTime | Movement date and time. |
-| movementType | String | Entry or exit. |
-| recordSource | String | Manual or system source. |
-| observation | String | Optional notes. |
+| Field        | Type     | Description              |
+| ------------ | -------- | ------------------------ |
+| id           | UUID     | Primary key.             |
+| staffId      | FK       | Related staff member.    |
+| dateTime     | DateTime | Movement date and time.  |
+| movementType | String   | Entry or exit.           |
+| recordSource | String   | Manual or system source. |
+| observation  | String   | Optional notes.          |
 
 Relationships:
 
@@ -773,10 +784,10 @@ Required roles:
 - Inventory Manager
 - Management
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Role name. |
+| Field       | Type   | Description       |
+| ----------- | ------ | ----------------- |
+| id          | UUID   | Primary key.      |
+| name        | String | Role name.        |
 | description | String | Role description. |
 
 Relationships:
@@ -787,19 +798,15 @@ Relationships:
 
 ## 7.24 User
 
-Stores internal system users.
+> **Canonical definition:** the authoritative `User` schema is defined in section 18.2 (User, Role, and Module Access Control Update). This section is kept only as a cross-reference to avoid a duplicated, divergent definition.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| staffId | FK | Related staff member. |
-| roleId | FK | Assigned role. |
-| username | String | Login username. |
-| passwordHash | String | Hashed password. |
-| status | String | User status. |
-| lastAccessAt | DateTime | Last login date and time. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+Stores internal system users who authenticate and access SunStay.
+
+Key points of the canonical definition (see 18.2):
+
+- Login credential is the unique `email` field. There is no `username` field.
+- `staffId` is **nullable**, so administrative users without a staff record are allowed.
+- Core fields: `id`, `staffId?`, `roleId`, `fullName`, `email` (`@unique`), `phone?`, `passwordHash`, `status` (Active | Inactive | Blocked), `lastAccessAt?`, `createdAt`, `updatedAt`, `deletedAt?`.
 
 Relationships:
 
@@ -807,12 +814,13 @@ Relationships:
 - One role can be assigned to many users.
 - One user can generate many reports.
 - One user can perform many reservation status changes.
+- One user can have many status history records.
 
 Security rules:
 
-- Passwords must never be stored in plain text.
-- Users must be linked to internal staff.
+- Passwords must never be stored in plain text; store only secure hashes.
 - Access must be controlled by role.
+- User email must be unique.
 
 ---
 
@@ -827,11 +835,11 @@ Recommended values:
 - Room Supplies
 - Cleaning Products
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| hotelId | FK | Related hotel. |
-| name | String | Area name. |
+| Field       | Type   | Description       |
+| ----------- | ------ | ----------------- |
+| id          | UUID   | Primary key.      |
+| hotelId     | FK     | Related hotel.    |
+| name        | String | Area name.        |
 | description | String | Area description. |
 
 Relationships:
@@ -845,10 +853,10 @@ Relationships:
 
 Catalog of product categories.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Category name. |
+| Field       | Type   | Description           |
+| ----------- | ------ | --------------------- |
+| id          | UUID   | Primary key.          |
+| name        | String | Category name.        |
 | description | String | Category description. |
 
 Relationships:
@@ -861,16 +869,16 @@ Relationships:
 
 Stores product or supply information.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| productCategoryId | FK | Related category. |
-| name | String | Product name. |
-| description | String | Product description. |
-| unitOfMeasure | String | Unit of measure. |
-| minimumStock | Decimal | Minimum stock threshold. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field             | Type     | Description              |
+| ----------------- | -------- | ------------------------ |
+| id                | UUID     | Primary key.             |
+| productCategoryId | FK       | Related category.        |
+| name              | String   | Product name.            |
+| description       | String   | Product description.     |
+| unitOfMeasure     | String   | Unit of measure.         |
+| minimumStock      | Decimal  | Minimum stock threshold. |
+| createdAt         | DateTime | Creation date.           |
+| updatedAt         | DateTime | Last update date.        |
 
 Relationships:
 
@@ -883,13 +891,13 @@ Relationships:
 
 Stores current stock by area and product.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| inventoryAreaId | FK | Related inventory area. |
-| productId | FK | Related product. |
-| currentStock | Decimal | Current stock amount. |
-| updatedAt | DateTime | Last update date. |
+| Field           | Type     | Description             |
+| --------------- | -------- | ----------------------- |
+| id              | UUID     | Primary key.            |
+| inventoryAreaId | FK       | Related inventory area. |
+| productId       | FK       | Related product.        |
+| currentStock    | Decimal  | Current stock amount.   |
+| updatedAt       | DateTime | Last update date.       |
 
 Relationships:
 
@@ -908,16 +916,16 @@ Business rules:
 
 Tracks stock entries and exits.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| inventoryId | FK | Related inventory record. |
-| staffId | FK | Staff member who registered the movement. |
-| movementDate | Date | Movement date. |
-| movementType | String | Entry or exit. |
-| quantity | Decimal | Movement quantity. |
-| reason | String | Movement reason. |
-| createdAt | DateTime | Creation date. |
+| Field        | Type     | Description                               |
+| ------------ | -------- | ----------------------------------------- |
+| id           | UUID     | Primary key.                              |
+| inventoryId  | FK       | Related inventory record.                 |
+| staffId      | FK       | Staff member who registered the movement. |
+| movementDate | Date     | Movement date.                            |
+| movementType | String   | Entry or exit.                            |
+| quantity     | Decimal  | Movement quantity.                        |
+| reason       | String   | Movement reason.                          |
+| createdAt    | DateTime | Creation date.                            |
 
 Relationships:
 
@@ -935,16 +943,16 @@ Recommended values:
 - Pool
 - Meeting Room
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| hotelId | FK | Related hotel. |
-| name | String | Common area name. |
-| description | String | Area description. |
-| capacity | Int | Maximum capacity. |
-| status | String | Current status. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field       | Type     | Description       |
+| ----------- | -------- | ----------------- |
+| id          | UUID     | Primary key.      |
+| hotelId     | FK       | Related hotel.    |
+| name        | String   | Common area name. |
+| description | String   | Area description. |
+| capacity    | Int      | Maximum capacity. |
+| status      | String   | Current status.   |
+| createdAt   | DateTime | Creation date.    |
+| updatedAt   | DateTime | Last update date. |
 
 Relationships:
 
@@ -957,18 +965,19 @@ Relationships:
 
 Stores reservations for common areas.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| commonAreaId | FK | Related common area. |
-| guestId | FK | Related guest. |
-| reservationDate | Date | Reservation date. |
-| startTime | Time | Start time. |
-| endTime | Time | End time. |
-| status | String | Reservation status. |
-| observation | String | Optional notes. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field           | Type     | Description                                |
+| --------------- | -------- | ------------------------------------------ |
+| id              | UUID     | Primary key.                               |
+| commonAreaId    | FK       | Related common area.                       |
+| guestId         | FK       | Related guest.                             |
+| reservationDate | Date     | Reservation date.                          |
+| startTime       | Time     | Start time.                                |
+| endTime         | Time     | End time.                                  |
+| attendeesCount  | Int      | Number of people attending. Defaults to 1. |
+| status          | String   | Reservation status.                        |
+| observation     | String   | Optional notes.                            |
+| createdAt       | DateTime | Creation date.                             |
+| updatedAt       | DateTime | Last update date.                          |
 
 Relationships:
 
@@ -999,10 +1008,10 @@ Recommended values:
 - Common Area Report
 - Monthly Performance Report
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Report type name. |
+| Field       | Type   | Description              |
+| ----------- | ------ | ------------------------ |
+| id          | UUID   | Primary key.             |
+| name        | String | Report type name.        |
 | description | String | Report type description. |
 
 Relationships:
@@ -1017,17 +1026,17 @@ Stores report generation metadata.
 
 Reports may be generated dynamically from operational data. This table stores metadata and traceability for generated reports.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| reportTypeId | FK | Related report type. |
-| userId | FK | User who generated the report. |
-| generatedAt | DateTime | Report generation date and time. |
-| startDate | Date | Filter start date. |
-| endDate | Date | Filter end date. |
-| format | String | Output format. |
-| criteria | String | Applied criteria or filters. |
-| observation | String | Optional notes. |
+| Field        | Type     | Description                      |
+| ------------ | -------- | -------------------------------- |
+| id           | UUID     | Primary key.                     |
+| reportTypeId | FK       | Related report type.             |
+| userId       | FK       | User who generated the report.   |
+| generatedAt  | DateTime | Report generation date and time. |
+| startDate    | Date     | Filter start date.               |
+| endDate      | Date     | Filter end date.                 |
+| format       | String   | Output format.                   |
+| criteria     | String   | Applied criteria or filters.     |
+| observation  | String   | Optional notes.                  |
 
 Relationships:
 
@@ -1041,12 +1050,12 @@ Relationships:
 
 Stores summarized details of a generated report when persistence is required.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| reportId | FK | Related report. |
+| Field           | Type   | Description                |
+| --------------- | ------ | -------------------------- |
+| id              | UUID   | Primary key.               |
+| reportId        | FK     | Related report.            |
 | itemDescription | String | Report detail description. |
-| referenceValue | String | Report detail value. |
+| referenceValue  | String | Report detail value.       |
 
 Relationships:
 
@@ -1186,7 +1195,7 @@ model RoomType {
   name        String
   description String?
   capacity    Int
-  baseRate    Decimal
+  baseRate    Decimal  @db.Decimal(12, 2)
   rooms       Room[]
 }
 
@@ -1213,6 +1222,7 @@ model Room {
   reservationDetails ReservationDetail[]
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
+  deletedAt      DateTime?
 }
 
 model RoomStatusHistory {
@@ -1246,10 +1256,15 @@ model Guest {
   phone            String?
   email            String?
   nationality      String?
+  birthYear        Int?
+  sex              String?
+  profession       String?
+  originCity       String?
   reservationGuests ReservationGuest[]
   commonAreaReservations CommonAreaReservation[]
   createdAt        DateTime                @default(now())
   updatedAt        DateTime                @updatedAt
+  deletedAt        DateTime?
 }
 
 model ReservationStatus {
@@ -1270,7 +1285,7 @@ model Reservation {
   checkOutDate        DateTime
   guestQuantity       Int
   reservationChannel  String?
-  estimatedAmount     Decimal?
+  estimatedAmount     Decimal?                   @db.Decimal(12, 2)
   observation         String?
   hotel               Hotel                      @relation(fields: [hotelId], references: [id])
   reservationHolder   ReservationHolder          @relation(fields: [reservationHolderId], references: [id])
@@ -1282,6 +1297,7 @@ model Reservation {
   invoice             Invoice?
   createdAt           DateTime                   @default(now())
   updatedAt           DateTime                   @updatedAt
+  deletedAt           DateTime?
 }
 
 model ReservationGuest {
@@ -1300,9 +1316,9 @@ model ReservationDetail {
   id             String      @id @default(uuid())
   reservationId  String
   roomId         String
-  appliedRate    Decimal
+  appliedRate    Decimal     @db.Decimal(12, 2)
   nightsQuantity Int
-  subtotal       Decimal
+  subtotal       Decimal     @db.Decimal(12, 2)
   reservation    Reservation @relation(fields: [reservationId], references: [id])
   room           Room        @relation(fields: [roomId], references: [id])
 }
@@ -1349,13 +1365,14 @@ model Invoice {
   paymentStatusId String
   paymentMethodId String
   issueDate       DateTime        @default(now())
-  total           Decimal
+  total           Decimal         @db.Decimal(12, 2)
   reservation     Reservation     @relation(fields: [reservationId], references: [id])
   paymentStatus   PaymentStatus   @relation(fields: [paymentStatusId], references: [id])
   paymentMethod   PaymentMethod   @relation(fields: [paymentMethodId], references: [id])
   details         InvoiceDetail[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
 }
 
 model InvoiceDetail {
@@ -1363,8 +1380,8 @@ model InvoiceDetail {
   invoiceId String
   concept   String
   quantity  Int
-  unitPrice Decimal
-  subtotal  Decimal
+  unitPrice Decimal @db.Decimal(12, 2)
+  subtotal  Decimal @db.Decimal(12, 2)
   invoice   Invoice @relation(fields: [invoiceId], references: [id])
 }
 
@@ -1403,6 +1420,7 @@ model Staff {
   user                User?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+  deletedAt           DateTime?
 }
 
 model StaffAttendance {
@@ -1427,26 +1445,86 @@ model StaffAccessControl {
 }
 
 model Role {
-  id          String @id @default(uuid())
-  name        String @unique
-  description String?
-  users       User[]
+  id           String                 @id @default(uuid())
+  name         String                 @unique
+  description  String?
+  isSystemRole Boolean                @default(false)
+  users        User[]
+  permissions  RoleModulePermission[]
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
 }
 
 model User {
   id           String                     @id @default(uuid())
-  staffId      String                     @unique
+  staffId      String?                    @unique
   roleId       String
-  username     String                     @unique
+  fullName     String
+  email        String                     @unique
+  phone        String?
   passwordHash String
-  status       String
+  status       String                     @default("Active")
   lastAccessAt DateTime?
-  staff        Staff                      @relation(fields: [staffId], references: [id])
+  staff        Staff?                     @relation(fields: [staffId], references: [id])
   role         Role                       @relation(fields: [roleId], references: [id])
   reservationStatusHistories ReservationStatusHistory[]
   reports      Report[]
+  statusHistories UserStatusHistory[]     @relation("UserStatusHistory_user")
+  statusChangesMade UserStatusHistory[]   @relation("UserStatusHistory_changedBy")
+  passwordResetTokens PasswordResetToken[]
   createdAt    DateTime                   @default(now())
   updatedAt    DateTime                   @updatedAt
+  deletedAt    DateTime?
+}
+
+model SystemModule {
+  id          String                 @id @default(uuid())
+  name        String
+  code        String                 @unique
+  route       String
+  description String?
+  isActive    Boolean                @default(true)
+  permissions RoleModulePermission[]
+}
+
+model RoleModulePermission {
+  id             String       @id @default(uuid())
+  roleId         String
+  systemModuleId String
+  canView        Boolean      @default(false)
+  canCreate      Boolean      @default(false)
+  canUpdate      Boolean      @default(false)
+  canDelete      Boolean      @default(false)
+  canExport      Boolean      @default(false)
+  canManage      Boolean      @default(false)
+  role           Role         @relation(fields: [roleId], references: [id])
+  systemModule   SystemModule @relation(fields: [systemModuleId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([roleId, systemModuleId])
+}
+
+model UserStatusHistory {
+  id              String   @id @default(uuid())
+  userId          String
+  previousStatus  String
+  newStatus       String
+  changedByUserId String
+  changeDateTime  DateTime @default(now())
+  reason          String?
+  user            User     @relation("UserStatusHistory_user", fields: [userId], references: [id])
+  changedByUser   User     @relation("UserStatusHistory_changedBy", fields: [changedByUserId], references: [id])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 model InventoryArea {
@@ -1471,18 +1549,19 @@ model Product {
   name              String
   description       String?
   unitOfMeasure     String
-  minimumStock      Decimal
+  minimumStock      Decimal         @db.Decimal(12, 3)
   productCategory   ProductCategory @relation(fields: [productCategoryId], references: [id])
   inventories       Inventory[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
 }
 
 model Inventory {
   id              String              @id @default(uuid())
   inventoryAreaId String
   productId       String
-  currentStock    Decimal
+  currentStock    Decimal             @db.Decimal(12, 3)
   updatedAt       DateTime            @updatedAt
   inventoryArea   InventoryArea       @relation(fields: [inventoryAreaId], references: [id])
   product         Product             @relation(fields: [productId], references: [id])
@@ -1497,7 +1576,7 @@ model InventoryMovement {
   staffId      String
   movementDate DateTime  @default(now())
   movementType String
-  quantity     Decimal
+  quantity     Decimal   @db.Decimal(12, 3)
   reason       String?
   inventory    Inventory @relation(fields: [inventoryId], references: [id])
   staff        Staff     @relation(fields: [staffId], references: [id])
@@ -1524,12 +1603,14 @@ model CommonAreaReservation {
   reservationDate DateTime
   startTime       String
   endTime         String
+  attendeesCount  Int        @default(1)
   status          String
   observation     String?
   commonArea      CommonArea @relation(fields: [commonAreaId], references: [id])
   guest           Guest      @relation(fields: [guestId], references: [id])
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
 }
 
 model ReportType {
@@ -1642,6 +1723,35 @@ Monthly Performance Report
 
 ---
 
+## 11.1 Status Taxonomy and UX Mapping
+
+Stored status values are kept in English; the UI displays Spanish labels (see `design.md`). The following mappings are canonical and must be used consistently across backend and frontend.
+
+### Staff status (`Staff.status`)
+
+| Stored value | UX label (Spanish) |
+| ------------ | ------------------ |
+| Active       | `Activo`           |
+| OnVacation   | `Vacaciones`       |
+| MedicalLeave | `Permiso Médico`   |
+
+### Attendance status (`StaffAttendance.attendanceStatus`)
+
+The data model stores the canonical operational outcome; the UI may derive intermediate display states (`Pendiente`, `Registrado`, `Salida Registrada`, `No Disponible`) from the stored value plus the entry/exit timestamps.
+
+| Stored value    | UX label (Spanish) | Derived UI state                           |
+| --------------- | ------------------ | ------------------------------------------ |
+| Present         | `Presente`         | `Registrado` once entry is recorded        |
+| Absent          | `Ausente`          | `No Disponible`                            |
+| Late            | `Tarde`            | `Registrado`                               |
+| Permission      | `Permiso`          | `No Disponible`                            |
+| Completed       | `Finalizada`       | `Salida Registrada` after exit is recorded |
+| (no record yet) | —                  | `Pendiente`                                |
+
+> `design.md` §13.10 lists the derived UI states. This table reconciles them with the stored `attendanceStatus` values so both documents agree.
+
+---
+
 ## 12. Reporting Data Strategy
 
 SunStay reports should primarily be generated from operational tables.
@@ -1722,59 +1832,63 @@ When modifying the database:
 
 ## 16. Pending Decisions
 
-The following decisions must be validated during implementation:
+Resolved decisions (2026-05-28):
 
-- Whether IDs will use UUIDs or numeric auto-increment values.
-- Whether soft delete will be used for operational tables.
+- **Primary keys:** UUID (`@default(uuid())`) for all tables. (Resolved)
+- **Soft delete:** enabled via nullable `deletedAt` on operational tables; catalog tables excluded. (Resolved)
+- **Payment table:** no separate `Payment` table for now. Partial payments are tracked through `Invoice.paymentStatus` (`Partial`). A dedicated `Payment` table may be introduced later if partial-payment history is required. (Resolved)
+
+Still open, to be validated during implementation:
+
 - Whether CommonAreaReservation should be linked directly to Reservation as well as Guest.
-- Whether payment records should be separated into a dedicated Payment table for partial payments.
-- Whether audit logs will be implemented as a generic table.
+- Whether audit logs will be implemented as a generic table (beyond the existing history tables).
 - Whether reports will store only metadata or also full report snapshots.
 
 ---
 
 ## 17. Version Log
 
-| Version | Date | Description |
-|---|---|---|
-| 1.0 | 2026 | Initial SunStay database documentation. |
-
+| Version | Date       | Description                                                                                                               |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | 2026       | Initial SunStay database documentation.                                                                                   |
+| 1.1     | 2026-05-28 | Users/Roles/Access-control update (§18); added SystemModule, RoleModulePermission, UserStatusHistory, PasswordResetToken. |
 
 ---
 
-## 10. User, Role, and Module Access Control Update
+## 18. User, Role, and Module Access Control Update
 
 The system requires a web-based user administration module because access to SunStay modules is controlled by role. The database must therefore support users, roles, system modules, role permissions, account status tracking, and security-related records.
 
-### 10.1 Access-control entities
+### 18.1 Access-control entities
 
-| Entity | Purpose |
-|---|---|
-| User | Stores internal system users who authenticate and access SunStay. |
-| Role | Defines the operational role assigned to users. |
-| SystemModule | Catalog of system modules that can be controlled by permissions. |
-| RoleModulePermission | Defines what each role can do in each module. |
-| UserStatusHistory | Tracks changes in user account status. |
-| UserSession | Stores active or historical login sessions when required. |
-| PasswordResetToken | Stores temporary password reset requests when required. |
+| Entity               | Purpose                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| User                 | Stores internal system users who authenticate and access SunStay.                           |
+| Role                 | Defines the operational role assigned to users.                                             |
+| SystemModule         | Catalog of system modules that can be controlled by permissions.                            |
+| RoleModulePermission | Defines what each role can do in each module.                                               |
+| UserStatusHistory    | Tracks changes in user account status.                                                      |
+| UserSession          | Stores active or historical login sessions when required. _(opcional, no implementada aún)_ |
+| PasswordResetToken   | Stores temporary password reset requests when required.                                     |
 
-### 10.2 User
+### 18.2 User (canonical definition)
 
-Stores internal user accounts for system access.
+Stores internal user accounts for system access. This is the authoritative `User` definition for the whole project; section 7.24 only cross-references it.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| staffId | FK / Nullable | Related staff member, when the user belongs to hotel staff. |
-| roleId | FK | Assigned system role. |
-| fullName | String | User full name. |
-| email | String | Login email or contact email. Must be unique. |
-| phone | String / Nullable | Contact phone. |
-| passwordHash | String | Secure password hash. Never store plain-text passwords. |
-| status | String / Catalog | Active, Inactive, or Blocked. |
-| lastAccessAt | DateTime / Nullable | Last successful access. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field        | Type                | Description                                                                  |
+| ------------ | ------------------- | ---------------------------------------------------------------------------- |
+| id           | UUID                | Primary key.                                                                 |
+| staffId      | FK / Nullable       | Related staff member, when the user belongs to hotel staff.                  |
+| roleId       | FK                  | Assigned system role.                                                        |
+| fullName     | String              | User full name.                                                              |
+| email        | String              | **Login credential.** Must be unique. There is no separate `username` field. |
+| phone        | String / Nullable   | Contact phone.                                                               |
+| passwordHash | String              | Secure password hash. Never store plain-text passwords.                      |
+| status       | String / Catalog    | Active, Inactive, or Blocked.                                                |
+| lastAccessAt | DateTime / Nullable | Last successful access.                                                      |
+| createdAt    | DateTime            | Creation date.                                                               |
+| updatedAt    | DateTime            | Last update date.                                                            |
+| deletedAt    | DateTime / Nullable | Soft-delete timestamp.                                                       |
 
 Relationships:
 
@@ -1784,7 +1898,7 @@ Relationships:
 - One user can perform many audited actions.
 - One user can have many status history records.
 
-### 10.3 Role
+### 18.3 Role
 
 Defines access profiles for internal users.
 
@@ -1795,21 +1909,21 @@ Recommended base values:
 - Inventory Manager
 - Management
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Role name. Must be unique. |
-| description | String | Role description. |
-| isSystemRole | Boolean | Indicates whether it is a protected base role. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field        | Type     | Description                                    |
+| ------------ | -------- | ---------------------------------------------- |
+| id           | UUID     | Primary key.                                   |
+| name         | String   | Role name. Must be unique.                     |
+| description  | String   | Role description.                              |
+| isSystemRole | Boolean  | Indicates whether it is a protected base role. |
+| createdAt    | DateTime | Creation date.                                 |
+| updatedAt    | DateTime | Last update date.                              |
 
 Relationships:
 
 - One role can be assigned to many users.
 - One role can have many module permissions.
 
-### 10.4 SystemModule
+### 18.4 SystemModule
 
 Catalog of modules that can be shown, hidden, or restricted according to role.
 
@@ -1819,45 +1933,45 @@ Recommended values:
 - Reservations
 - Guests
 - Rooms
-- Billing
+- Billing and Payments
 - Inventory
 - Staff
-- Attendance
+- Attendance and Access Control
 - Common Areas
 - Reports
 - Users
-- Roles
+- Roles and Permissions
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| name | String | Module name. |
-| code | String | Stable internal code, for example `RESERVATIONS`. |
-| route | String | Main frontend route. |
-| description | String | Module purpose. |
-| isActive | Boolean | Indicates whether the module is enabled. |
+| Field       | Type    | Description                                       |
+| ----------- | ------- | ------------------------------------------------- |
+| id          | UUID    | Primary key.                                      |
+| name        | String  | Module name.                                      |
+| code        | String  | Stable internal code, for example `RESERVATIONS`. |
+| route       | String  | Main frontend route.                              |
+| description | String  | Module purpose.                                   |
+| isActive    | Boolean | Indicates whether the module is enabled.          |
 
 Relationships:
 
 - One system module can appear in many role permission records.
 
-### 10.5 RoleModulePermission
+### 18.5 RoleModulePermission
 
 Defines permissions granted to each role over each system module.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| roleId | FK | Related role. |
-| systemModuleId | FK | Related module. |
-| canView | Boolean | Allows viewing the module. |
-| canCreate | Boolean | Allows creating records. |
-| canUpdate | Boolean | Allows updating records. |
-| canDelete | Boolean | Allows deleting/cancelling records when applicable. |
-| canExport | Boolean | Allows exporting data or reports. |
-| canManage | Boolean | Allows administrative management actions. |
-| createdAt | DateTime | Creation date. |
-| updatedAt | DateTime | Last update date. |
+| Field          | Type     | Description                                         |
+| -------------- | -------- | --------------------------------------------------- |
+| id             | UUID     | Primary key.                                        |
+| roleId         | FK       | Related role.                                       |
+| systemModuleId | FK       | Related module.                                     |
+| canView        | Boolean  | Allows viewing the module.                          |
+| canCreate      | Boolean  | Allows creating records.                            |
+| canUpdate      | Boolean  | Allows updating records.                            |
+| canDelete      | Boolean  | Allows deleting/cancelling records when applicable. |
+| canExport      | Boolean  | Allows exporting data or reports.                   |
+| canManage      | Boolean  | Allows administrative management actions.           |
+| createdAt      | DateTime | Creation date.                                      |
+| updatedAt      | DateTime | Last update date.                                   |
 
 Relationships:
 
@@ -1870,34 +1984,34 @@ Recommended unique constraint:
 roleId + systemModuleId
 ```
 
-### 10.6 UserStatusHistory
+### 18.6 UserStatusHistory
 
 Tracks status changes for user accounts.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| userId | FK | User whose status changed. |
-| previousStatus | String | Previous account status. |
-| newStatus | String | New account status. |
-| changedByUserId | FK | Administrator who performed the change. |
-| changeDateTime | DateTime | Date and time of change. |
-| reason | String / Nullable | Reason or observation. |
+| Field           | Type              | Description                             |
+| --------------- | ----------------- | --------------------------------------- |
+| id              | UUID              | Primary key.                            |
+| userId          | FK                | User whose status changed.              |
+| previousStatus  | String            | Previous account status.                |
+| newStatus       | String            | New account status.                     |
+| changedByUserId | FK                | Administrator who performed the change. |
+| changeDateTime  | DateTime          | Date and time of change.                |
+| reason          | String / Nullable | Reason or observation.                  |
 
-### 10.7 PasswordResetToken
+### 18.7 PasswordResetToken
 
 Stores temporary password reset records when password reset is implemented.
 
-| Field | Type | Description |
-|---|---|---|
-| id | UUID / Int | Primary key. |
-| userId | FK | Related user. |
-| tokenHash | String | Hashed reset token. |
-| expiresAt | DateTime | Expiration date and time. |
-| usedAt | DateTime / Nullable | Usage date and time. |
-| createdAt | DateTime | Creation date. |
+| Field     | Type                | Description               |
+| --------- | ------------------- | ------------------------- |
+| id        | UUID                | Primary key.              |
+| userId    | FK                  | Related user.             |
+| tokenHash | String              | Hashed reset token.       |
+| expiresAt | DateTime            | Expiration date and time. |
+| usedAt    | DateTime / Nullable | Usage date and time.      |
+| createdAt | DateTime            | Creation date.            |
 
-### 10.8 Access-control database rules
+### 18.8 Access-control database rules
 
 - Users must authenticate before accessing internal modules.
 - User passwords must be stored only as secure hashes.
