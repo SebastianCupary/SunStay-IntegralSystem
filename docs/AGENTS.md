@@ -177,7 +177,6 @@ Rules:
 - Project commands in documentation must be written with Bun.
 - If a tool requires Node compatibility, keep it behind Bun-compatible scripts.
 
-
 ## 4. Frontend Structure Rules
 
 The frontend must be built with **Next.js**, TypeScript, and Bun tooling.
@@ -366,7 +365,7 @@ Recommended route structure:
 /api/attendance
 /api/common-areas
 /api/reports
-/dashboard
+/api/dashboard
 ```
 
 API rules:
@@ -616,7 +615,6 @@ SunStay must always remain focused on hotel operational management, internal use
 ## 17. Final Agent Instruction
 
 Follow this `AGENTS.md` strictly. Before creating files, analyze the business module, define its structure, keep the project modular, and update the corresponding documentation files after every structural change.
-
 
 ---
 

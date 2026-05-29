@@ -50,7 +50,7 @@ Management users consult dashboards, reports, indicators, monthly performance, o
 ### 4.1 Reservations
 
 - A reservation must have one responsible person or reservation holder.
-- A reservation may include one or more guests.
+- A reservation must include at least one guest.
 - A reservation may include one or more rooms depending on room type, capacity, and availability.
 - A room cannot be assigned to overlapping confirmed reservations for the same date range.
 - Reservation status must be tracked.
@@ -574,7 +574,7 @@ When requirements change, the following files must also be reviewed and updated 
 - `docs/api.md`
 - `docs/design.md`
 - `docs/architecture.md`
-- `AGENTS.md`
+- `docs/AGENTS.md`
 
 No new module, workflow, entity, or major UI change should be added without updating the corresponding documentation.
 
@@ -594,8 +594,6 @@ Before implementing a new feature, define:
 - UI view
 - required permissions
 - documentation updates
-
-
 
 ---
 
@@ -617,20 +615,20 @@ The creation of the **Users and Roles** module is required because SunStay contr
 
 ### 10.2 Base roles and expected access
 
-| Module | Administrator | Receptionist | Inventory Manager | Management |
-|---|---:|---:|---:|---:|
-| Dashboard | Full | Limited | Limited | Full |
-| Reservations | Full | Full | No access | View |
-| Guests | Full | Full | No access | View |
-| Rooms | Full | Full | No access | View |
-| Billing | Full | Create / Update | No access | View |
-| Inventory | Full | No access | Full | View |
-| Staff | Full | No access | No access | View |
-| Attendance | Full | No access | No access | View |
-| Common Areas | Full | Full | No access | View |
-| Reports | Full | No access | No access | Full |
-| Users | Full | No access | No access | No access |
-| Roles / Permissions | Full | No access | No access | No access |
+| Module              | Administrator |    Receptionist | Inventory Manager | Management |
+| ------------------- | ------------: | --------------: | ----------------: | ---------: |
+| Dashboard           |          Full |         Limited |           Limited |       Full |
+| Reservations        |          Full |            Full |         No access |       View |
+| Guests              |          Full |            Full |         No access |       View |
+| Rooms               |          Full |            Full |         No access |       View |
+| Billing             |          Full | Create / Update |         No access |       View |
+| Inventory           |          Full |       No access |              Full |       View |
+| Staff               |          Full |       No access |         No access |       View |
+| Attendance          |          Full |       No access |         No access |       View |
+| Common Areas        |          Full |            Full |         No access |       View |
+| Reports             |          Full |       No access |         No access |       Full |
+| Users               |          Full |       No access |         No access |  No access |
+| Roles / Permissions |          Full |       No access |         No access |  No access |
 
 ### 10.3 Additional functional requirements
 
@@ -686,7 +684,7 @@ This update also records the complete migration of the project to **Bun** as run
 
 This update affects:
 
-- `AGENTS.md`
+- `docs/AGENTS.md`
 - `docs/requirements.md`
 - `docs/database.md`
 - `docs/api.md`

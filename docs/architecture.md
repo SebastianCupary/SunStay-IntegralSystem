@@ -73,6 +73,7 @@ The Users and Roles module supports internal access control.
 ### Folder structure
 
 **Frontend:**
+
 - `apps/web/app/users/` — Users list, detail, and administration pages
 - `apps/web/app/roles/` — Roles and permissions management pages
 - `apps/web/app/profile/` — Authenticated user profile, settings, change password
@@ -80,6 +81,7 @@ The Users and Roles module supports internal access control.
 - `apps/web/features/roles/` — Roles feature logic (hooks, components, context)
 
 **Backend:**
+
 - `apps/api/src/modules/users/` — Users module (controller, service, DTOs, module)
 - `apps/api/src/modules/roles/` — Roles module (controller, service, DTOs, module)
 - `apps/api/src/auth/` — Authentication module (login, JWT, guards)
@@ -124,12 +126,12 @@ The Users and Roles module supports internal access control.
 
 ## 6. Base Role Access
 
-| Role | Architectural purpose |
-|---|---|
-| Administrator | Full access, including users, roles, permissions, configuration, and operational modules. |
-| Receptionist | Operational access to reservations, guests, rooms, billing, common areas, check-in, and check-out. |
-| Inventory Manager | Access to inventory, products, stock movements, and stock alerts. |
-| Management | Read-oriented access to dashboard, reports, indicators, and summaries. |
+| Role              | Architectural purpose                                                                              |
+| ----------------- | -------------------------------------------------------------------------------------------------- |
+| Administrator     | Full access, including users, roles, permissions, configuration, and operational modules.          |
+| Receptionist      | Operational access to reservations, guests, rooms, billing, common areas, check-in, and check-out. |
+| Inventory Manager | Access to inventory, products, stock movements, and stock alerts.                                  |
+| Management        | Read-oriented access to dashboard, reports, indicators, and summaries.                             |
 
 ---
 
