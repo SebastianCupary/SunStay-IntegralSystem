@@ -1,3 +1,5 @@
+import { getAuthToken } from "./auth";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
 
 export interface ApiError {
@@ -8,22 +10,17 @@ export interface ApiError {
   path: string;
 }
 
-export class ApiResponse<T> {
-  constructor(
-    public readonly data: T,
-    public readonly timestamp: string,
-  ) {}
-}
-
 async function request<T>(
   path: string,
   options?: RequestInit,
 ): Promise<T> {
   const url = `${API_BASE}${path}`;
+  const token = getAuthToken();
   const response = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options?.headers,
     },
     credentials: "include",

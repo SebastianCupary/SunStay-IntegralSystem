@@ -89,14 +89,43 @@ All responses are wrapped by `TransformInterceptor`:
 
 ## 3. Authentication Endpoints
 
-| Method | Route                       | Purpose                                                                                       | Access              |
-| ------ | --------------------------- | --------------------------------------------------------------------------------------------- | ------------------- |
-| POST   | `/api/auth/login`           | Authenticate internal user. Login credential is the unique **email**; there is no `username`. | Public              |
-| POST   | `/api/auth/logout`          | Close current session.                                                                        | Authenticated       |
-| GET    | `/api/auth/me`              | Return authenticated user profile and permissions.                                            | Authenticated       |
-| PATCH  | `/api/auth/change-password` | Change own password.                                                                          | Authenticated       |
-| POST   | `/api/auth/forgot-password` | Request password reset.                                                                       | Public / controlled |
-| POST   | `/api/auth/reset-password`  | Complete password reset.                                                                      | Public / controlled |
+Implemented authentication endpoints:
+
+| Method | Route                   | Purpose                                                                                       | Access                     |
+| ------ | ----------------------- | --------------------------------------------------------------------------------------------- | -------------------------- |
+| POST   | `/api/auth/login`       | Authenticate internal user. Login credential is the unique **email**; there is no `username`. | Public                     |
+| GET    | `/api/auth/me`          | Return authenticated user profile, role, and permissions.                                     | Authenticated              |
+| GET    | `/api/auth/admin-check` | Verifies role permission enforcement for `USERS/manage`.                                      | Authenticated + permission |
+
+Pending authentication endpoints:
+
+| Method | Route                       | Purpose                        | Access              |
+| ------ | --------------------------- | ------------------------------ | ------------------- |
+| POST   | `/api/auth/logout`          | Close current session.         | Authenticated       |
+| PATCH  | `/api/auth/change-password` | Change own password.           | Authenticated       |
+| POST   | `/api/auth/forgot-password` | Request password reset.        | Public / controlled |
+| POST   | `/api/auth/reset-password`  | Complete password reset.       | Public / controlled |
+
+`POST /api/auth/login` returns:
+
+```json
+{
+  "data": {
+    "accessToken": "jwt-token",
+    "user": {
+      "id": "uuid",
+      "fullName": "Administrador SunStay",
+      "email": "admin@sunstay.local",
+      "status": "Active",
+      "role": { "id": "uuid", "name": "Administrator" },
+      "permissions": []
+    }
+  },
+  "timestamp": "2026-05-29T00:30:00.000Z"
+}
+```
+
+Protected routes require an `Authorization: Bearer <token>` header. Missing or invalid tokens return `401`; missing module permissions return `403`.
 
 ---
 
