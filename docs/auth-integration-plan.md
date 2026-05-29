@@ -1,6 +1,6 @@
 # Plan: Integración de Autenticación y control de acceso por rol (RBAC)
 
-> Estado: **propuesta / no implementado**. Documento de planificación para el módulo de Auth de SunStay.
+> Estado: **implementado**. Documento de planificación para el módulo de Auth de SunStay.
 
 ## Contexto / por qué ahora
 
@@ -48,7 +48,7 @@ Dependencia nueva: `@nestjs/jwt` (firma/verificación JWT con `JWT_SECRET` / `JW
   fase) y redirigir a `/dashboard`.
 - `lib/auth.ts`: helpers de sesión + adjuntar `Authorization: Bearer` en `lib/api.ts`.
 - `GET /me` para resolver permisos y construir el sidebar/menú a partir de los módulos permitidos por rol.
-- `middleware.ts`: proteger rutas internas (redirige a `/login` sin sesión).
+- `proxy.ts`: proteger rutas internas (redirige a `/login` sin sesión). Next.js 16 usa `proxy.ts` como reemplazo de la convención `middleware.ts`.
 
 ## Documentación a actualizar
 
